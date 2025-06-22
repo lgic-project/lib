@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+  <!-- Background -->
+  <rect x="0" y="0" width="800" height="600" fill="#f0f6ff" />
+  
+  <!-- Shelf -->
+  <rect x="100" y="130" width="600" height="20" fill="#8b4513" />
+  <rect x="95" y="150" width="610" height="5" fill="#6b3a10" />
+  <rect x="100" y="280" width="600" height="20" fill="#8b4513" />
+  <rect x="95" y="300" width="610" height="5" fill="#6b3a10" />
+  <rect x="100" y="430" width="600" height="20" fill="#8b4513" />
+  <rect x="95" y="450" width="610" height="5" fill="#6b3a10" />
+  
+  <!-- Books on top shelf -->
+  <rect x="110" y="50" width="30" height="80" fill="#cc0000" />
+  <rect x="140" y="50" width="25" height="80" fill="#009900" />
+  <rect x="165" y="50" width="35" height="80" fill="#0000cc" />
+  <rect x="200" y="50" width="20" height="80" fill="#ffcc00" />
+  <rect x="220" y="50" width="40" height="80" fill="#9900cc" />
+  <rect x="260" y="50" width="30" height="80" fill="#cc6600" />
+  <rect x="290" y="50" width="25" height="80" fill="#ff9900" />
+  <rect x="315" y="50" width="35" height="80" fill="#00cccc" />
+  <rect x="350" y="50" width="30" height="80" fill="#ff00ff" />
+  <rect x="380" y="50" width="25" height="80" fill="#666666" />
+  <rect x="405" y="50" width="20" height="80" fill="#00ff00" />
+  <rect x="425" y="50" width="35" height="80" fill="#0099cc" />
+  <rect x="460" y="50" width="30" height="80" fill="#ff6666" />
+  <rect x="490" y="50" width="40" height="80" fill="#006600" />
+  <rect x="530" y="50" width="25" height="80" fill="#660066" />
+  <rect x="555" y="50" width="35" height="80" fill="#663300" />
+  <rect x="590" y="50" width="30" height="80" fill="#333399" />
+  <rect x="620" y="50" width="25" height="80" fill="#cc3300" />
+  <rect x="645" y="50" width="35" height="80" fill="#99cc00" />
+  
+  <!-- Books on middle shelf -->
+  <rect x="110" y="200" width="40" height="80" fill="#3366cc" />
+  <rect x="150" y="200" width="30" height="80" fill="#cc0066" />
+  <rect x="180" y="200" width="25" height="80" fill="#ffcc33" />
+  <rect x="205" y="200" width="35" height="80" fill="#669900" />
+  <rect x="240" y="200" width="30" height="80" fill="#993366" />
+  <rect x="270" y="200" width="25" height="80" fill="#0099ff" />
+  <rect x="295" y="200" width="40" height="80" fill="#ff9933" />
+  <rect x="335" y="200" width="30" height="80" fill="#6600cc" />
+  <rect x="365" y="200" width="25" height="80" fill="#339966" />
+  <rect x="390" y="200" width="35" height="80" fill="#cc3333" />
+  <rect x="425" y="200" width="20" height="80" fill="#333333" />
+  <rect x="445" y="200" width="30" height="80" fill="#6699ff" />
+  <rect x="475" y="200" width="25" height="80" fill="#cc9900" />
+  <rect x="500" y="200" width="40" height="80" fill="#009933" />
+  <rect x="540" y="200" width="30" height="80" fill="#ff3399" />
+  <rect x="570" y="200" width="35" height="80" fill="#003366" />
+  <rect x="605" y="200" width="25" height="80" fill="#669933" />
+  <rect x="630" y="200" width="40" height="80" fill="#cc6633" />
+  
+  <!-- Books on bottom shelf -->
+  <rect x="120" y="350" width="25" height="80" fill="#9966cc" />
+  <rect x="145" y="350" width="35" height="80" fill="#cc9933" />
+  <rect x="180" y="350" width="30" height="80" fill="#339999" />
+  <rect x="210" y="350" width="25" height="80" fill="#ff6600" />
+  <rect x="235" y="350" width="40" height="80" fill="#006699" />
+  <rect x="275" y="350" width="30" height="80" fill="#cc0033" />
+  <rect x="305" y="350" width="35" height="80" fill="#669966" />
+  <rect x="340" y="350" width="30" height="80" fill="#9933cc" />
+  <rect x="370" y="350" width="25" height="80" fill="#ff9966" />
+  <rect x="395" y="350" width="20" height="80" fill="#003399" />
+  <rect x="415" y="350" width="35" height="80" fill="#cc6699" />
+  <rect x="450" y="350" width="30" height="80" fill="#336600" />
+  <rect x="480" y="350" width="40" height="80" fill="#9900ff" />
+  <rect x="520" y="350" width="25" height="80" fill="#ff3333" />
+  <rect x="545" y="350" width="30" height="80" fill="#006633" />
+  <rect x="575" y="350" width="35" height="80" fill="#990066" />
+  <rect x="610" y="350" width="25" height="80" fill="#cc9966" />
+  <rect x="635" y="350" width="30" height="80" fill="#3300cc" />
+  
+  <!-- Person reading -->
+  <circle cx="400" cy="530" r="30" fill="#ffcc99" /> <!-- Head -->
+  <rect x="385" y="560" width="30" height="40" fill="#3366cc" /> <!-- Body -->
+  <rect x="370" y="570" width="15" height="20" fill="#ffcc99" /> <!-- Left arm -->
+  <rect x="415" y="570" width="15" height="20" fill="#ffcc99" /> <!-- Right arm -->
+  <rect x="390" y="600" width="10" height="20" fill="#000066" /> <!-- Left leg -->
+  <rect x="400" y="600" width="10" height="20" fill="#000066" /> <!-- Right leg -->
+  
+  <!-- Book in hands -->
+  <rect x="370" y="570" width="60" height="10" fill="#ff6600" /> <!-- Open book -->
+  
+  <!-- Decorative elements -->
+  <circle cx="700" cy="80" r="40" fill="#ffffcc" /> <!-- Light from lamp -->
+  <rect x="695" y="120" width="10" height="30" fill="#666666" /> <!-- Lamp stand -->
+</svg>

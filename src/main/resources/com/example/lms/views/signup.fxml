@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane prefHeight="600.0" prefWidth="800.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.lms.controller.SignupController">
+    <HBox spacing="0">
+        <!-- Left Panel with Illustration -->
+        <VBox alignment="CENTER" maxWidth="350" styleClass="left-panel" HBox.hgrow="ALWAYS">
+            <Label styleClass="app-name" text="Library Management System" wrapText="true" />
+            <Label styleClass="app-tagline" text="Join our community of book lovers" wrapText="true" />
+            <ImageView fx:id="illustrationImg" fitHeight="280" fitWidth="280" preserveRatio="true">
+                <Image url="@../images/signup-illustration.png" />
+            </ImageView>
+            <padding>
+                <Insets bottom="20" left="20" right="20" top="20" />
+            </padding>
+        </VBox>
+        
+        <!-- Right Panel with Signup Form -->
+        <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="edge-to-edge">
+            <VBox alignment="CENTER" prefHeight="810.0" prefWidth="528.0" HBox.hgrow="ALWAYS">
+                <StackPane>
+                    <VBox maxWidth="400" spacing="15" styleClass="auth-container">
+                        <Label styleClass="auth-title" text="Create Account" />
+                        <Label styleClass="auth-subtitle" text="Fill in the form to get started" />
+                        
+                        <!-- Full Name Field -->
+                        <VBox styleClass="form-group">
+                            <Label styleClass="form-group-label" text="FULL NAME" />
+                            <TextField fx:id="nameField" promptText="Enter your full name" styleClass="input-field" />
+                        </VBox>
+                        
+                        <!-- Email Field -->
+                        <VBox styleClass="form-group">
+                            <Label styleClass="form-group-label" text="EMAIL" />
+                            <TextField fx:id="emailField" promptText="Enter your email" styleClass="input-field" />
+                        </VBox>
+                        
+                        <!-- Password Field -->
+                        <VBox styleClass="form-group">
+                            <Label styleClass="form-group-label" text="PASSWORD" />
+                            <PasswordField fx:id="passwordField" promptText="Create a password" styleClass="input-field" />
+                        </VBox>
+                        
+                        <!-- Confirm Password Field -->
+                        <VBox styleClass="form-group">
+                            <Label styleClass="form-group-label" text="CONFIRM PASSWORD" />
+                            <PasswordField fx:id="confirmPasswordField" promptText="Confirm your password" styleClass="input-field" />
+                        </VBox>
+                        
+                        <!-- User Role Selection -->
+                        <VBox styleClass="form-group">
+                            <Label styleClass="form-group-label" text="SELECT ACCOUNT TYPE" />
+                            <ComboBox fx:id="roleComboBox" maxWidth="Infinity" promptText="Select role" styleClass="input-field" />
+                        </VBox>
+                        
+                        <!-- Error Label -->
+                        <Label fx:id="errorLabel" styleClass="error-label" text="Error message" visible="false" wrapText="true" />
+                        
+                        <!-- Register Button -->
+                        <Button fx:id="registerBtn" maxWidth="Infinity" onAction="#onRegisterClick" styleClass="action-btn" text="REGISTER" />
+                        
+                        <!-- Already have account section -->
+                        <HBox alignment="CENTER" spacing="5">
+                            <Label text="Already have an account?" />
+                            <Button fx:id="loginBtn" onAction="#onLoginClick" styleClass="link-btn" text="Log In" />
+                        </HBox>
+                    </VBox>
+                </StackPane>
+                <padding>
+                    <Insets bottom="30" left="30" right="30" top="30" />
+                </padding>
+            </VBox>
+        </ScrollPane>
+    </HBox>
+</StackPane>

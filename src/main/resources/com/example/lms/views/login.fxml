@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.*?>
+
+<StackPane xmlns="http://javafx.com/javafx"
+          xmlns:fx="http://javafx.com/fxml"
+          fx:controller="com.example.lms.controller.LoginController"
+          prefHeight="600.0" prefWidth="800.0" 
+          stylesheets="@styles.css">
+    <HBox spacing="0">
+        <!-- Left Panel with Illustration -->
+        <VBox styleClass="left-panel" HBox.hgrow="ALWAYS" alignment="CENTER" maxWidth="350">
+            <Label styleClass="app-name" text="Library Management System" wrapText="true" />
+            <Label styleClass="app-tagline" text="Access your digital library with ease" wrapText="true" />
+            <ImageView fx:id="illustrationImg" fitWidth="280" fitHeight="280" preserveRatio="true">
+                <Image url="@../images/library-illustration.png" />
+            </ImageView>
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20" />
+            </padding>
+        </VBox>
+        
+        <!-- Right Panel with Login Form -->
+        <VBox alignment="CENTER" HBox.hgrow="ALWAYS" spacing="15">
+            <StackPane>
+                <VBox styleClass="auth-container" maxWidth="400" spacing="15">
+                    <Label styleClass="auth-title" text="Welcome Back" />
+                    <Label styleClass="auth-subtitle" text="Sign in to continue to your account" />
+                    
+                    <!-- Email Field -->
+                    <VBox styleClass="form-group">
+                        <Label styleClass="form-group-label" text="EMAIL" />
+                        <TextField fx:id="emailField" styleClass="input-field" promptText="Enter your email" />
+                    </VBox>
+                    
+                    <!-- Password Field -->
+                    <VBox styleClass="form-group">
+                        <Label styleClass="form-group-label" text="PASSWORD" />
+                        <PasswordField fx:id="passwordField" styleClass="input-field" promptText="Enter your password" />
+                    </VBox>
+                    
+                    <!-- Remember me & Forgot Password Row -->
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <CheckBox fx:id="rememberMeCheck" text="Remember me" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button fx:id="forgotPasswordBtn" styleClass="link-btn" 
+                                text="Forgot Password?" onAction="#onForgotPasswordClick" />
+                    </HBox>
+                    
+                    <!-- Error Label -->
+                    <Label fx:id="errorLabel" styleClass="error-label" visible="false" 
+                           text="Invalid email or password" wrapText="true" />
+                    
+                    <!-- Login Button -->
+                    <Button fx:id="loginBtn" styleClass="action-btn" text="LOG IN" 
+                            onAction="#onLoginClick" maxWidth="Infinity" />
+                    
+                    <!-- Don't have account section -->
+                    <HBox alignment="CENTER" spacing="5">
+                        <Label text="Don't have an account?" />
+                        <Button fx:id="signupBtn" styleClass="link-btn" 
+                                text="Sign Up" onAction="#onSignupClick" />
+                    </HBox>
+                </VBox>
+            </StackPane>
+            <padding>
+                <Insets top="30" right="30" bottom="30" left="30" />
+            </padding>
+        </VBox>
+    </HBox>
+</StackPane>
