@@ -271,7 +271,7 @@ public class BookDAO {
      * @throws SQLException if database error occurs
      */
     public boolean addBook(Book book) throws SQLException {
-        String query = "INSERT INTO books (title, isbn, publication_year, publisher_id, description, cover_image) " +
+        String query = "INSERT INTO books (title, isbn, publication_year, publisher_id, description, cover_image_url) " +
                       "VALUES (?, ?, ?, ?, ?, ?)";
         
         try (PreparedStatement stmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
@@ -323,7 +323,7 @@ public class BookDAO {
      */
     public boolean updateBook(Book book) throws SQLException {
         String query = "UPDATE books SET title = ?, isbn = ?, publication_year = ?, " +
-                      "publisher_id = ?, description = ?, cover_image = ? WHERE id = ?";
+                      "publisher_id = ?, description = ?, cover_image_url = ? WHERE id = ?";
         
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, book.getTitle());
@@ -455,7 +455,7 @@ public class BookDAO {
         book.setIsbn(rs.getString("isbn"));
         book.setPublicationYear(rs.getInt("publication_year"));
         book.setDescription(rs.getString("description"));
-        book.setCoverImage(rs.getString("cover_image"));
+        book.setCoverImage(rs.getString("cover_image_url"));
         
         int publisherId = rs.getInt("publisher_id");
         if (!rs.wasNull()) {

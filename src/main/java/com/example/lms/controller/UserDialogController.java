@@ -59,9 +59,9 @@ public class UserDialogController {
         
         // Set up role options
         roleComboBox.setItems(FXCollections.observableArrayList(
-            "Admin", "Librarian", "User"
+            "admin", "librarian", "user"
         ));
-        roleComboBox.getSelectionModel().select("User");
+        roleComboBox.getSelectionModel().select("user");
         
         // Clear error message initially
         errorLabel.setText("");
@@ -119,12 +119,12 @@ public class UserDialogController {
         
         try {
             // Populate user object from form fields
-            user.setName(nameField.getText().trim());
-            user.setEmail(emailField.getText().trim());
-            user.setPhone(phoneField.getText().trim());
+            user.setName(nameField.getText() != null ? nameField.getText().trim() : "");
+            user.setEmail(emailField.getText() != null ? emailField.getText().trim() : "");
+            user.setPhone(phoneField.getText() != null ? phoneField.getText().trim() : "");
             
             // Set password only if provided (for edit mode)
-            String password = passwordField.getText();
+            String password = passwordField.getText() != null ? passwordField.getText() : "";
             if (!password.isEmpty()) {
                 user.setPassword(password);
             }
@@ -172,8 +172,8 @@ public class UserDialogController {
      * @return true if input is valid, false otherwise
      */
     private boolean validateInput() {
-        String name = nameField.getText().trim();
-        String email = emailField.getText().trim();
+        String name = nameField.getText() != null ? nameField.getText().trim() : "";
+        String email = emailField.getText() != null ? emailField.getText().trim() : "";
         String role = roleComboBox.getValue();
         
         // Reset error message
