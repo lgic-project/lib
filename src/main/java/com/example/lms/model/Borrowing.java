@@ -12,6 +12,8 @@ public class Borrowing {
     private BookCopy bookCopy;
     private int userId;
     private User user;
+    private User issuedBy;           // Staff who issued the book
+    private User returnedTo;        // Staff who received the returned book
     private LocalDate borrowDate;
     private LocalDate dueDate;
     private LocalDate returnDate;
@@ -136,6 +138,22 @@ public class Borrowing {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+    
+    public User getIssuedBy() {
+        return issuedBy;
+    }
+    
+    public void setIssuedBy(User issuedBy) {
+        this.issuedBy = issuedBy;
+    }
+    
+    public User getReturnedTo() {
+        return returnedTo;
+    }
+    
+    public void setReturnedTo(User returnedTo) {
+        this.returnedTo = returnedTo;
     }
 
     // Update status based on dates

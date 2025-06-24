@@ -4,7 +4,11 @@ import com.example.lms.util.Database;
 
 import java.sql.*;
 import java.time.LocalDate;
-import java.util.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Data Access Object for Borrowing entities
@@ -215,82 +219,43 @@ public class BorrowingDAO {
             String insertQuery = "INSERT INTO borrowings (user_id, copy_id, borrow_date, due_date, issued_by) " +
                                "VALUES (?, ?, ?, ?, ?)";
             
-            try (PreparedStatement stmt = connection.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS)) {
-                stmt.setInt(1, borrowing.getUser().getId());
-                stmt.setInt(2, borrowing.getBookCopy().getId());
-                stmt.setDate(3, Date.valueOf(borrowing.getBorrowDate()));
-                stmt.setDate(4, Date.valueOf(borrowing.getDueDate()));
-                
-                if (borrowing.getIssuedBy() != null) {
-                    stmt.setInt(5, borrowing.getIssuedBy().getId());
-                } else {
-                    stmt.setNull(5, Types.INTEGER);
-                }
-                
-                int affectedRows = stmt.executeUpdate();
-                
-                if (affectedRows > 0) {
-                    try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-                        if (generatedKeys.next()) {
-                            borrowing.setId(generatedKeys.getInt(1));
-                            
-                            // Update book copy status to BORROWED
-                            boolean statusUpdated = bookCopyDAO.updateCopyStatus(
-                                    borrowing.getBookCopy().getId(), 
-                                    BookCopy.Status.BORROWED
-                            );
-                            
-                            if (statusUpdated) {
-                                connection.commit();
-                                return true;
-                            }
+            if (borrowing.getIssuedBy() != null) {
+                stmt.setInt(5, borrowing.getIssuedBy().getId());
+            } else {
+                stmt.setNull(5, Types.INTEGER);
+            }
+            
+            int affectedRows = stmt.executeUpdate();
+            
+            if (affectedRows > 0) {
+                try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        borrowing.setId(generatedKeys.getInt(1));
+                        
+                        // Update book copy status to BORROWED
+                        boolean statusUpdated = bookCopyDAO.updateCopyStatus(
+                                borrowing.getBookCopy().getId(), 
+                                BookCopy.Status.BORROWED
+                        );
+                        
+                        if (statusUpdated) {
+                            connection.commit();
+                            return true;
                         }
                     }
                 }
             }
-            
-            // If we got here, something failed
-            connection.rollback();
-            return false;
-            
-        } catch (SQLException e) {
-            connection.rollback();
-            throw e;
-        } finally {
-            connection.setAutoCommit(true);
-        }
-    }
-    
-    /**
-     * Record a book return
-     * 
-     * @param borrowingId Borrowing ID
-     * @param returnDate Return date
-     * @param returnedTo Staff who processed the return
-     * @return true if successful, false otherwise
-     * @throws SQLException if database error occurs
-     */
-    public boolean returnBook(int borrowingId, LocalDate returnDate, User returnedTo) throws SQLException {
-        // Get the borrowing record
-        Borrowing borrowing = getBorrowingById(borrowingId);
-        if (borrowing == null || borrowing.getReturnDate() != null) {
-            return false;
         }
         
-        // Begin transaction
-        connection.setAutoCommit(false);
+        // If we got here, something failed
+        connection.rollback();
+        return false;
         
-        try {
-            // Update borrowing record
-            String updateQuery = "UPDATE borrowings SET return_date = ?, returned_to = ? WHERE id = ?";
-            
-            try (PreparedStatement stmt = connection.prepareStatement(updateQuery)) {
-                stmt.setDate(1, Date.valueOf(returnDate));
-                
-                if (returnedTo != null) {
-                    stmt.setInt(2, returnedTo.getId());
-                } else {
-                    stmt.setNull(2, Types.INTEGER);
+    } catch (SQLException e) {
+        connection.rollback();
+        throw e;
+    } finally {
+        connection.setAutoCommit(true);
                 }
                 
                 stmt.setInt(3, borrowingId);
@@ -549,9 +514,8 @@ public class BorrowingDAO {
             if (bookCopyDAO != null) {
                 bookCopyDAO.close();
             }
-            if (userDAO != null) {
-                userDAO.close();
-            }
+            // UserDAO doesn't have a close() method
+            // No need to close the userDAO here
         } catch (SQLException e) {
             System.err.println("Error closing BorrowingDAO: " + e.getMessage());
         }
