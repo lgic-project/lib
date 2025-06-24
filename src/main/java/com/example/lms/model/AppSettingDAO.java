@@ -1,6 +1,6 @@
 package com.example.lms.model;
 
-import com.example.lms.util.DatabaseConnection;
+import com.example.lms.util.Database;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -28,7 +28,7 @@ public class AppSettingDAO {
         String value = null;
         
         try {
-            conn = DatabaseConnection.getConnection();
+            conn = Database.getConnection();
             String query = "SELECT setting_value FROM app_setting WHERE setting_key = ?";
             stmt = conn.prepareStatement(query);
             stmt.setString(1, key);
@@ -62,7 +62,7 @@ public class AppSettingDAO {
         boolean success = false;
         
         try {
-            conn = DatabaseConnection.getConnection();
+            conn = Database.getConnection();
             String query = "UPDATE app_setting SET setting_value = ? WHERE setting_key = ?";
             stmt = conn.prepareStatement(query);
             stmt.setString(1, value);
@@ -105,7 +105,7 @@ public class AppSettingDAO {
         Map<String, String> settings = new HashMap<>();
         
         try {
-            conn = DatabaseConnection.getConnection();
+            conn = Database.getConnection();
             String query = "SELECT setting_key, setting_value FROM app_setting";
             stmt = conn.prepareStatement(query);
             
@@ -137,7 +137,7 @@ public class AppSettingDAO {
         List<AppSetting> settings = new ArrayList<>();
         
         try {
-            conn = DatabaseConnection.getConnection();
+            conn = Database.getConnection();
             String query = "SELECT * FROM app_setting ORDER BY id";
             stmt = conn.prepareStatement(query);
             
@@ -193,5 +193,84 @@ public class AppSettingDAO {
         } catch (SQLException e) {
             System.err.println("Error closing resources: " + e.getMessage());
         }
+    }
+    
+    /**
+     * Add a new setting.
+     * 
+     * @param setting AppSetting object to add
+     * @return true if successful, false otherwise
+     */
+    public boolean addSetting(AppSetting setting) {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        boolean success = false;
+        
+        try {
+            conn = Database.getConnection();
+            String query = "INSERT INTO app_setting (setting_key, setting_value) VALUES (?, ?)";
+            stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            stmt.setString(1, setting.getSettingKey());
+            stmt.setString(2, setting.getSettingValue());
+            
+            int rowsAffected = stmt.executeUpdate();
+            
+            if (rowsAffected > 0) {
+                try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        setting.setId(generatedKeys.getInt(1));
+                        success = true;
+                    }
+                }
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error adding setting: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            closeResources(null, stmt, conn);
+        }
+        
+        return success;
+    }
+    
+    /**
+     * Update an existing setting using AppSetting object.
+     * 
+     * @param setting AppSetting object to update
+     * @return true if successful, false otherwise
+     */
+    public boolean updateSetting(AppSetting setting) {
+        return updateSetting(setting.getSettingKey(), setting.getSettingValue());
+    }
+    
+    /**
+     * Delete a setting by key.
+     * 
+     * @param key Setting key to delete
+     * @return true if successful, false otherwise
+     */
+    public boolean deleteSetting(String key) {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        boolean success = false;
+        
+        try {
+            conn = Database.getConnection();
+            String query = "DELETE FROM app_setting WHERE setting_key = ?";
+            stmt = conn.prepareStatement(query);
+            stmt.setString(1, key);
+            
+            int rowsAffected = stmt.executeUpdate();
+            success = (rowsAffected > 0);
+            
+        } catch (SQLException e) {
+            System.err.println("Error deleting setting: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            closeResources(null, stmt, conn);
+        }
+        
+        return success;
     }
 }

@@ -73,6 +73,30 @@ public class AppSetting {
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
+    
+    /**
+     * Alias for getSettingKey() to maintain compatibility with controller
+     * @return the setting key
+     */
+    public String getKey() {
+        return getSettingKey();
+    }
+    
+    /**
+     * Alias for getSettingValue() to maintain compatibility with controller
+     * @return the setting value
+     */
+    public String getValue() {
+        return getSettingValue();
+    }
+    
+    /**
+     * Alias for setSettingValue() to maintain compatibility with controller
+     * @param value the setting value to set
+     */
+    public void setValue(String value) {
+        setSettingValue(value);
+    }
 
     @Override
     public String toString() {

@@ -77,6 +77,17 @@ public class BookCopyDAO {
     }
     
     /**
+     * Alias for getCopyById to maintain compatibility with BorrowingDAO
+     * 
+     * @param id Copy ID
+     * @return BookCopy object or null if not found
+     * @throws SQLException if database error occurs
+     */
+    public BookCopy getBookCopyById(int id) throws SQLException {
+        return getCopyById(id);
+    }
+    
+    /**
      * Get a specific copy by book ID and copy number
      * 
      * @param bookId Book ID
@@ -134,23 +145,34 @@ public class BookCopyDAO {
      * @throws SQLException if database error occurs
      */
     public boolean addBookCopy(BookCopy copy) throws SQLException {
-        // First determine the next copy number for this book
-        int nextCopyNumber = getNextCopyNumber(copy.getBook().getId());
-        copy.setCopyNumber(String.valueOf(nextCopyNumber));
+        // Make sure we have a book
+        if (copy.getBook() == null || copy.getBook().getId() == 0) {
+            return false;
+        }
+        
+        // Assign next copy number if not set
+        if (copy.getCopyNumber() == null || copy.getCopyNumber().isEmpty()) {
+            String nextCopyNumber = getNextCopyNumber(copy.getBook().getId());
+            copy.setCopyNumber(nextCopyNumber);
+        }
+        
+        // Set default status if not set
+        if (copy.getStatus() == null) {
+            copy.setStatus(BookCopy.Status.AVAILABLE);
+        }
+        
+        // Set acquisition date if not set
+        if (copy.getAcquisitionDate() == null) {
+            copy.setAcquisitionDate(LocalDate.now());
+        }
         
         String query = "INSERT INTO book_copies (book_id, copy_number, acquisition_date, status, location, notes) " +
-                      "VALUES (?, ?, ?, ?, ?, ?)";
+                       "VALUES (?, ?, ?, ?, ?, ?)";
         
         try (PreparedStatement stmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setInt(1, copy.getBook().getId());
             stmt.setString(2, copy.getCopyNumber());
-            
-            if (copy.getAcquisitionDate() != null) {
-                stmt.setDate(3, Date.valueOf(copy.getAcquisitionDate()));
-            } else {
-                stmt.setNull(3, Types.DATE);
-            }
-            
+            stmt.setDate(3, java.sql.Date.valueOf(copy.getAcquisitionDate()));
             stmt.setString(4, copy.getStatus().toString());
             stmt.setString(5, copy.getLocation());
             stmt.setString(6, copy.getNotes());
@@ -177,21 +199,21 @@ public class BookCopyDAO {
      * @return Next available copy number
      * @throws SQLException if database error occurs
      */
-    private int getNextCopyNumber(int bookId) throws SQLException {
-        String query = "SELECT MAX(copy_number) AS max_copy FROM book_copies WHERE book_id = ?";
+    public String getNextCopyNumber(int bookId) throws SQLException {
+        String query = "SELECT MAX(CAST(copy_number AS UNSIGNED)) AS max_num FROM book_copies WHERE book_id = ?";
         
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, bookId);
             
             try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    int maxCopy = rs.getInt("max_copy");
-                    return maxCopy + 1;
+                if (rs.next() && rs.getObject("max_num") != null) {
+                    int maxNum = rs.getInt("max_num");
+                    return String.valueOf(maxNum + 1);
+                } else {
+                    return "1"; // First copy
                 }
             }
         }
-        
-        return 1; // First copy
     }
     
     /**
@@ -202,20 +224,17 @@ public class BookCopyDAO {
      * @throws SQLException if database error occurs
      */
     public boolean updateBookCopy(BookCopy copy) throws SQLException {
-        String query = "UPDATE book_copies SET acquisition_date = ?, status = ?, location = ?, notes = ? " +
-                      "WHERE id = ?";
+        String query = "UPDATE book_copies SET book_id = ?, copy_number = ?, acquisition_date = ?, status = ?, " +
+                       "location = ?, notes = ? WHERE id = ?";
         
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            if (copy.getAcquisitionDate() != null) {
-                stmt.setDate(1, Date.valueOf(copy.getAcquisitionDate()));
-            } else {
-                stmt.setNull(1, Types.DATE);
-            }
-            
-            stmt.setString(2, copy.getStatus().toString());
-            stmt.setString(3, copy.getLocation());
-            stmt.setString(4, copy.getNotes());
-            stmt.setInt(5, copy.getId());
+            stmt.setInt(1, copy.getBook().getId());
+            stmt.setString(2, copy.getCopyNumber());
+            stmt.setDate(3, java.sql.Date.valueOf(copy.getAcquisitionDate()));
+            stmt.setString(4, copy.getStatus().toString());
+            stmt.setString(5, copy.getLocation());
+            stmt.setString(6, copy.getNotes());
+            stmt.setInt(7, copy.getId());
             
             int affectedRows = stmt.executeUpdate();
             return affectedRows > 0;
@@ -250,9 +269,8 @@ public class BookCopyDAO {
      * @throws SQLException if database error occurs
      */
     public boolean deleteBookCopy(int id) throws SQLException {
-        // First check if the copy is currently borrowed
+        // Check if the copy is currently borrowed
         String checkQuery = "SELECT COUNT(*) FROM borrowings WHERE copy_id = ? AND return_date IS NULL";
-        
         try (PreparedStatement checkStmt = connection.prepareStatement(checkQuery)) {
             checkStmt.setInt(1, id);
             
@@ -364,7 +382,7 @@ public class BookCopyDAO {
     /**
      * Close the database connection
      */
-    public void close() {
+    public void close() throws SQLException {
         try {
             if (connection != null && !connection.isClosed()) {
                 connection.close();
@@ -376,6 +394,7 @@ public class BookCopyDAO {
             }
         } catch (SQLException e) {
             System.err.println("Error closing BookCopyDAO: " + e.getMessage());
+            throw e;
         }
     }
 }

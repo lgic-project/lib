@@ -175,7 +175,7 @@ public class AdminHomeController implements ChildController {
             int currentYear = LocalDate.now().getYear();
             
             // Get monthly borrowing counts
-            Map<String, Integer> monthlyBorrowings = borrowingDAO.getMonthlyBorrowingCounts(currentYear);
+            Map<Integer, Integer> monthlyBorrowings = borrowingDAO.getMonthlyBorrowingCounts(currentYear);
             
             // Create series
             XYChart.Series<String, Number> series = new XYChart.Series<>();

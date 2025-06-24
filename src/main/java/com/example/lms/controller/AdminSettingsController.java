@@ -14,7 +14,6 @@ import javafx.stage.FileChooser;
 import javafx.util.Callback;
 
 import java.io.File;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -58,10 +57,10 @@ public class AdminSettingsController implements ChildController {
         appSettingDAO = new AppSettingDAO();
         
         // Set up table columns
-        settingKeyColumn.setCellValueFactory(new PropertyValueFactory<>("key"));
+        settingKeyColumn.setCellValueFactory(new PropertyValueFactory<>("settingKey"));
         settingValueColumn.setCellValueFactory(cellData -> {
-            String value = cellData.getValue().getValue();
-            String key = cellData.getValue().getKey();
+            String value = cellData.getValue().getSettingValue();
+            String key = cellData.getValue().getSettingKey();
             
             // Mask sensitive values like passwords
             if (key.toLowerCase().contains("password") || key.toLowerCase().contains("secret") || 
@@ -134,27 +133,14 @@ public class AdminSettingsController implements ChildController {
     }
     
     /**
-     * Load all settings
+     * Load settings into the table
      */
     private void loadSettings() {
-        try {
-            List<AppSetting> settingsList = appSettingDAO.getAllSettings();
-            settings.setAll(settingsList);
-            settingsTable.setItems(settings);
-        } catch (SQLException e) {
-            System.err.println("Error loading settings: " + e.getMessage());
-            
-            // Show error message
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText(null);
-            alert.setContentText("Failed to load settings: " + e.getMessage());
-            alert.showAndWait();
-            
-            // Clear the table
-            settings.clear();
-        }
+        List<AppSetting> settingsList = appSettingDAO.getAllAppSettings();
+        settings.setAll(settingsList);
+        settingsTable.setItems(settings);
     }
+
     
     /**
      * Event handler for add setting button
@@ -205,7 +191,10 @@ public class AdminSettingsController implements ChildController {
                     return null;
                 }
                 
-                return new AppSetting(key, value);
+                AppSetting newSetting = new AppSetting();
+                newSetting.setSettingKey(key);
+                newSetting.setSettingValue(value);
+                return newSetting;
             }
             return null;
         });
@@ -213,32 +202,22 @@ public class AdminSettingsController implements ChildController {
         Optional<AppSetting> result = dialog.showAndWait();
         
         result.ifPresent(setting -> {
-            try {
-                boolean added = appSettingDAO.addSetting(setting);
+            boolean added = appSettingDAO.addSetting(setting);
+            
+            if (added) {
+                // Reload settings
+                loadSettings();
                 
-                if (added) {
-                    // Reload settings
-                    loadSettings();
-                    
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Success");
-                    alert.setHeaderText(null);
-                    alert.setContentText("Setting added successfully.");
-                    alert.showAndWait();
-                } else {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Error");
-                    alert.setHeaderText(null);
-                    alert.setContentText("Failed to add setting. The key may already exist.");
-                    alert.showAndWait();
-                }
-            } catch (SQLException e) {
-                System.err.println("Error adding setting: " + e.getMessage());
-                
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Success");
+                alert.setHeaderText(null);
+                alert.setContentText("Setting added successfully.");
+                alert.showAndWait();
+            } else {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Error");
                 alert.setHeaderText(null);
-                alert.setContentText("Failed to add setting: " + e.getMessage());
+                alert.setContentText("Failed to add setting. The key may already exist.");
                 alert.showAndWait();
             }
         });
@@ -253,14 +232,14 @@ public class AdminSettingsController implements ChildController {
         // Create dialog for editing the setting
         Dialog<String> dialog = new Dialog<>();
         dialog.setTitle("Edit Setting");
-        dialog.setHeaderText("Edit value for: " + setting.getKey());
+        dialog.setHeaderText("Edit value for: " + setting.getSettingKey());
         
         // Set button types
         ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
         
         // Create form fields
-        TextField valueField = new TextField(setting.getValue());
+        TextField valueField = new TextField(setting.getSettingValue());
         
         // Create grid for form layout
         javafx.scene.layout.GridPane grid = new javafx.scene.layout.GridPane();
@@ -285,33 +264,23 @@ public class AdminSettingsController implements ChildController {
         Optional<String> result = dialog.showAndWait();
         
         result.ifPresent(value -> {
-            try {
-                setting.setValue(value);
-                boolean updated = appSettingDAO.updateSetting(setting);
+            setting.setSettingValue(value);
+            boolean updated = appSettingDAO.updateSetting(setting);
+            
+            if (updated) {
+                // Reload settings
+                loadSettings();
                 
-                if (updated) {
-                    // Reload settings
-                    loadSettings();
-                    
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Success");
-                    alert.setHeaderText(null);
-                    alert.setContentText("Setting updated successfully.");
-                    alert.showAndWait();
-                } else {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Error");
-                    alert.setHeaderText(null);
-                    alert.setContentText("Failed to update setting.");
-                    alert.showAndWait();
-                }
-            } catch (SQLException e) {
-                System.err.println("Error updating setting: " + e.getMessage());
-                
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Success");
+                alert.setHeaderText(null);
+                alert.setContentText("Setting updated successfully.");
+                alert.showAndWait();
+            } else {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Error");
                 alert.setHeaderText(null);
-                alert.setContentText("Failed to update setting: " + e.getMessage());
+                alert.setContentText("Failed to update setting.");
                 alert.showAndWait();
             }
         });
@@ -326,36 +295,26 @@ public class AdminSettingsController implements ChildController {
         // Ask for confirmation
         Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
         confirmation.setTitle("Delete Setting");
-        confirmation.setHeaderText("Delete Setting: " + setting.getKey());
+        confirmation.setHeaderText("Delete Setting: " + setting.getSettingKey());
         confirmation.setContentText("Are you sure you want to delete this setting? This action cannot be undone.");
         
         confirmation.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
-                try {
-                    boolean deleted = appSettingDAO.deleteSetting(setting.getKey());
+                boolean deleted = appSettingDAO.deleteSetting(setting.getSettingKey());
+                
+                if (deleted) {
+                    settings.remove(setting);
                     
-                    if (deleted) {
-                        settings.remove(setting);
-                        
-                        Alert success = new Alert(Alert.AlertType.INFORMATION);
-                        success.setTitle("Setting Deleted");
-                        success.setHeaderText(null);
-                        success.setContentText("Setting has been successfully deleted.");
-                        success.showAndWait();
-                    } else {
-                        Alert error = new Alert(Alert.AlertType.ERROR);
-                        error.setTitle("Error");
-                        error.setHeaderText(null);
-                        error.setContentText("Failed to delete setting.");
-                        error.showAndWait();
-                    }
-                } catch (SQLException e) {
-                    System.err.println("Error deleting setting: " + e.getMessage());
-                    
+                    Alert success = new Alert(Alert.AlertType.INFORMATION);
+                    success.setTitle("Setting Deleted");
+                    success.setHeaderText(null);
+                    success.setContentText("Setting has been successfully deleted.");
+                    success.showAndWait();
+                } else {
                     Alert error = new Alert(Alert.AlertType.ERROR);
                     error.setTitle("Error");
                     error.setHeaderText(null);
-                    error.setContentText("Failed to delete setting: " + e.getMessage());
+                    error.setContentText("Failed to delete setting.");
                     error.showAndWait();
                 }
             }

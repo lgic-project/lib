@@ -24,7 +24,7 @@ public class Reservation {
         PENDING,
         FULFILLED,
         EXPIRED,
-        CANCELLED
+        NOTIFIED, CANCELLED
     }
 
     // Default constructor
@@ -97,16 +97,16 @@ public class Reservation {
         }
     }
 
-    public LocalDateTime getReservationDate() {
-        return reservationDate;
+    public String getReservationDate() {
+        return String.valueOf(reservationDate);
     }
 
     public void setReservationDate(LocalDateTime reservationDate) {
         this.reservationDate = reservationDate;
     }
 
-    public LocalDateTime getExpiryDate() {
-        return expiryDate;
+    public String getExpiryDate() {
+        return String.valueOf(expiryDate);
     }
 
     public void setExpiryDate(LocalDateTime expiryDate) {
