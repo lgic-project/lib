@@ -45,17 +45,7 @@ CREATE TABLE IF NOT EXISTS publishers (
     INDEX idx_publisher_name (name)
 ) ENGINE=InnoDB;
 
--- Create authors table
-CREATE TABLE IF NOT EXISTS authors (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    biography TEXT,
-    birth_date DATE,
-    nationality VARCHAR(50),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_author_name (name)
-) ENGINE=InnoDB;
+-- Authors are now directly included in the books table as author_name field
 
 -- Create categories table
 CREATE TABLE IF NOT EXISTS categories (
@@ -71,6 +61,7 @@ CREATE TABLE IF NOT EXISTS categories (
 CREATE TABLE IF NOT EXISTS books (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
+    author_name VARCHAR(100) NOT NULL,
     isbn VARCHAR(20) UNIQUE,
     publisher_id INT,
     publication_year INT,
@@ -83,17 +74,11 @@ CREATE TABLE IF NOT EXISTS books (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (publisher_id) REFERENCES publishers(id) ON DELETE SET NULL,
     INDEX idx_book_title (title),
-    INDEX idx_book_isbn (isbn)
+    INDEX idx_book_isbn (isbn),
+    INDEX idx_book_author (author_name)
 ) ENGINE=InnoDB;
 
--- Create book_authors junction table
-CREATE TABLE IF NOT EXISTS book_authors (
-    book_id INT NOT NULL,
-    author_id INT NOT NULL,
-    PRIMARY KEY (book_id, author_id),
-    FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE,
-    FOREIGN KEY (author_id) REFERENCES authors(id) ON DELETE CASCADE
-) ENGINE=InnoDB;
+-- Book authors are now directly included in the books table as author_name field
 
 -- Create book_categories junction table
 CREATE TABLE IF NOT EXISTS book_categories (
@@ -211,13 +196,7 @@ INSERT INTO publishers (name, address, phone, email, website) VALUES
 ('HarperCollins', '195 Broadway, New York, NY 10007', '212-207-7000', 'info@harpercollins.com', 'https://www.harpercollins.com'),
 ('Pearson Education', '221 River Street, Hoboken, NJ 07030', '201-236-7000', 'info@pearson.com', 'https://www.pearson.com');
 
--- Insert sample authors
-INSERT INTO authors (name, biography, nationality) VALUES
-('J.K. Rowling', 'British author best known for the Harry Potter series.', 'British'),
-('Stephen King', 'American author of horror, supernatural fiction, suspense, crime, science-fiction, and fantasy novels.', 'American'),
-('Robert C. Martin', 'American software engineer and author known for developing many software design principles.', 'American'),
-('George Orwell', 'English novelist, essayist, journalist, and critic.', 'British'),
-('Harper Lee', 'American novelist widely known for her novel "To Kill a Mockingbird".', 'American');
+-- Authors are now directly included in books table
 
 -- Insert sample categories
 INSERT INTO categories (name, description) VALUES
@@ -233,20 +212,14 @@ INSERT INTO categories (name, description) VALUES
 ('Philosophy', 'Books about philosophical concepts');
 
 -- Insert sample books
-INSERT INTO books (title, isbn, publisher_id, publication_year, edition, pages, description, cover_image_url) VALUES
-('Clean Code', '9780132350884', 1, 2008, '1st Edition', 464, 'A handbook of agile software craftsmanship', '/images/books/clean_code.jpg'),
-('Harry Potter and the Philosopher\'s Stone', '9780747532743', 2, 1997, '1st Edition', 223, 'The first novel in the Harry Potter series', '/images/books/harry_potter.jpg'),
-('To Kill a Mockingbird', '9780061120084', 3, 1960, 'Reissue', 336, 'A novel set in the American South during the 1930s', '/images/books/to_kill_mockingbird.jpg'),
-('1984', '9780451524935', 2, 1949, 'Reprint', 328, 'A dystopian novel set in a totalitarian regime', '/images/books/1984.jpg'),
-('The Shining', '9780307743657', 3, 1977, 'Reissue', 688, 'A horror novel set in an isolated hotel', '/images/books/shining.jpg');
+INSERT INTO books (title, author_name, isbn, publisher_id, publication_year, edition, pages, description, cover_image_url) VALUES
+('Clean Code', 'Robert C. Martin', '9780132350884', 1, 2008, '1st Edition', 464, 'A handbook of agile software craftsmanship', '/images/books/clean_code.jpg'),
+('Harry Potter and the Philosopher\'s Stone', 'J.K. Rowling', '9780747532743', 2, 1997, '1st Edition', 223, 'The first novel in the Harry Potter series', '/images/books/harry_potter.jpg'),
+('To Kill a Mockingbird', 'Harper Lee', '9780061120084', 3, 1960, 'Reissue', 336, 'A novel set in the American South during the 1930s', '/images/books/to_kill_mockingbird.jpg'),
+('1984', 'George Orwell', '9780451524935', 2, 1949, 'Reprint', 328, 'A dystopian novel set in a totalitarian regime', '/images/books/1984.jpg'),
+('The Shining', 'Stephen King', '9780307743657', 3, 1977, 'Reissue', 688, 'A horror novel set in an isolated hotel', '/images/books/shining.jpg');
 
--- Link books with authors
-INSERT INTO book_authors (book_id, author_id) VALUES
-(1, 3), -- Clean Code by Robert C. Martin
-(2, 1), -- Harry Potter by J.K. Rowling
-(3, 5), -- To Kill a Mockingbird by Harper Lee
-(4, 4), -- 1984 by George Orwell
-(5, 2); -- The Shining by Stephen King
+-- Authors are now directly included in the books table
 
 -- Link books with categories
 INSERT INTO book_categories (book_id, category_id) VALUES

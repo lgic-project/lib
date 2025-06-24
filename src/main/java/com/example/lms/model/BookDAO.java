@@ -14,7 +14,6 @@ public class BookDAO {
     
     private Connection connection;
     private PublisherDAO publisherDAO;
-    private AuthorDAO authorDAO;
     private CategoryDAO categoryDAO;
     
     /**
@@ -24,7 +23,6 @@ public class BookDAO {
         try {
             connection = Database.getConnection();
             publisherDAO = new PublisherDAO();
-            authorDAO = new AuthorDAO();
             categoryDAO = new CategoryDAO();
         } catch (SQLException e) {
             System.err.println("Error initializing BookDAO: " + e.getMessage());
@@ -143,11 +141,7 @@ public class BookDAO {
      */
     public List<Book> getBooksByAuthor(String authorName) throws SQLException {
         List<Book> books = new ArrayList<>();
-        String query = "SELECT b.* FROM books b " +
-                       "JOIN book_authors ba ON b.id = ba.book_id " +
-                       "JOIN authors a ON ba.author_id = a.id " +
-                       "WHERE a.name LIKE ? " +
-                       "ORDER BY b.title";
+        String query = "SELECT * FROM books WHERE author_name LIKE ? ORDER BY title";
         
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, "%" + authorName + "%");
@@ -223,15 +217,13 @@ public class BookDAO {
         
         StringBuilder queryBuilder = new StringBuilder();
         queryBuilder.append("SELECT DISTINCT b.* FROM books b ");
-        queryBuilder.append("LEFT JOIN book_authors ba ON b.id = ba.book_id ");
-        queryBuilder.append("LEFT JOIN authors a ON ba.author_id = a.id ");
         
         if (category != null && !category.isEmpty()) {
             queryBuilder.append("JOIN book_categories bc ON b.id = bc.book_id ");
             queryBuilder.append("JOIN categories c ON bc.category_id = c.id ");
         }
         
-        queryBuilder.append("WHERE (b.title LIKE ? OR a.name LIKE ? OR b.isbn LIKE ?) ");
+        queryBuilder.append("WHERE (b.title LIKE ? OR b.author_name LIKE ? OR b.isbn LIKE ?) ");
         
         if (category != null && !category.isEmpty()) {
             queryBuilder.append("AND c.name = ? ");
@@ -271,13 +263,13 @@ public class BookDAO {
      * @throws SQLException if database error occurs
      */
     public boolean addBook(Book book) throws SQLException {
-        String query = "INSERT INTO books (title, isbn, publication_year, publisher_id, description, cover_image_url) " +
-                      "VALUES (?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO books (title, author_name, isbn, publisher_id, publication_year, edition, language, pages, description, cover_image_url) " +
+                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         try (PreparedStatement stmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, book.getTitle());
-            stmt.setString(2, book.getIsbn());
-            stmt.setInt(3, book.getPublicationYear());
+            stmt.setString(2, book.getAuthorName());
+            stmt.setString(3, book.getIsbn());
             
             if (book.getPublisher() != null) {
                 stmt.setInt(4, book.getPublisher().getId());
@@ -285,8 +277,12 @@ public class BookDAO {
                 stmt.setNull(4, Types.INTEGER);
             }
             
-            stmt.setString(5, book.getDescription());
-            stmt.setString(6, book.getCoverImage());
+            stmt.setInt(5, book.getPublicationYear());
+            stmt.setString(6, book.getEdition());
+            stmt.setString(7, book.getLanguage());
+            stmt.setInt(8, book.getPages());
+            stmt.setString(9, book.getDescription());
+            stmt.setString(10, book.getCoverImageUrl());
             
             int affectedRows = stmt.executeUpdate();
             
@@ -295,14 +291,22 @@ public class BookDAO {
                     if (generatedKeys.next()) {
                         book.setId(generatedKeys.getInt(1));
                         
-                        // Add authors
-                        for (Author author : book.getAuthors()) {
-                            authorDAO.addAuthorToBook(author.getId(), book.getId());
-                        }
-                        
                         // Add categories
-                        for (Category category : book.getCategories()) {
-                            categoryDAO.addCategoryToBook(category.getId(), book.getId());
+                        if (book.getCategories() != null && !book.getCategories().isEmpty()) {
+                            for (Category category : book.getCategories()) {
+                                if (category.getId() == 0) {
+                                    // New category, save it first
+                                    categoryDAO.addCategory(category);
+                                }
+                                
+                                // Create the book-category relation
+                                String categoryQuery = "INSERT INTO book_categories (book_id, category_id) VALUES (?, ?)";
+                                try (PreparedStatement categoryStmt = connection.prepareStatement(categoryQuery)) {
+                                    categoryStmt.setInt(1, book.getId());
+                                    categoryStmt.setInt(2, category.getId());
+                                    categoryStmt.executeUpdate();
+                                }
+                            }
                         }
                         
                         return true;
@@ -315,6 +319,8 @@ public class BookDAO {
     }
     
     /**
+     * Add a new book
+     * 
      * Update an existing book
      * 
      * @param book Book to update
@@ -322,33 +328,31 @@ public class BookDAO {
      * @throws SQLException if database error occurs
      */
     public boolean updateBook(Book book) throws SQLException {
-        String query = "UPDATE books SET title = ?, isbn = ?, publication_year = ?, " +
-                      "publisher_id = ?, description = ?, cover_image_url = ? WHERE id = ?";
+        String query = "UPDATE books SET title = ?, author_name = ?, isbn = ?, publication_year = ?, " +
+                       "publisher_id = ?, edition = ?, language = ?, pages = ?, description = ?, cover_image_url = ? WHERE id = ?";
         
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, book.getTitle());
-            stmt.setString(2, book.getIsbn());
-            stmt.setInt(3, book.getPublicationYear());
+            stmt.setString(2, book.getAuthorName());
+            stmt.setString(3, book.getIsbn());
+            stmt.setInt(4, book.getPublicationYear());
             
             if (book.getPublisher() != null) {
-                stmt.setInt(4, book.getPublisher().getId());
+                stmt.setInt(5, book.getPublisher().getId());
             } else {
-                stmt.setNull(4, Types.INTEGER);
+                stmt.setNull(5, Types.INTEGER);
             }
             
-            stmt.setString(5, book.getDescription());
-            stmt.setString(6, book.getCoverImage());
-            stmt.setInt(7, book.getId());
+            stmt.setString(6, book.getEdition());
+            stmt.setString(7, book.getLanguage());
+            stmt.setInt(8, book.getPages());
+            stmt.setString(9, book.getDescription());
+            stmt.setString(10, book.getCoverImageUrl());
+            stmt.setInt(11, book.getId());
             
             int affectedRows = stmt.executeUpdate();
             
             if (affectedRows > 0) {
-                // Update authors (remove all and re-add)
-                clearBookAuthors(book.getId());
-                for (Author author : book.getAuthors()) {
-                    authorDAO.addAuthorToBook(author.getId(), book.getId());
-                }
-                
                 // Update categories (remove all and re-add)
                 clearBookCategories(book.getId());
                 for (Category category : book.getCategories()) {
@@ -362,20 +366,7 @@ public class BookDAO {
         return false;
     }
     
-    /**
-     * Clear all author associations for a book
-     * 
-     * @param bookId Book ID
-     * @throws SQLException if database error occurs
-     */
-    private void clearBookAuthors(int bookId) throws SQLException {
-        String query = "DELETE FROM book_authors WHERE book_id = ?";
-        
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setInt(1, bookId);
-            stmt.executeUpdate();
-        }
-    }
+    // clearBookAuthors method removed - no longer needed with author_name in books table
     
     /**
      * Clear all category associations for a book
@@ -414,8 +405,7 @@ public class BookDAO {
             }
         }
         
-        // Remove author associations
-        clearBookAuthors(id);
+        // Authors are now directly in books table, no associations to clear
         
         // Remove category associations
         clearBookCategories(id);
@@ -452,6 +442,7 @@ public class BookDAO {
         Book book = new Book();
         book.setId(rs.getInt("id"));
         book.setTitle(rs.getString("title"));
+        book.setAuthorName(rs.getString("author_name"));
         book.setIsbn(rs.getString("isbn"));
         book.setPublicationYear(rs.getInt("publication_year"));
         book.setDescription(rs.getString("description"));
@@ -473,10 +464,6 @@ public class BookDAO {
      * @throws SQLException if database error occurs
      */
     private void loadBookRelations(Book book) throws SQLException {
-        // Load authors
-        List<Author> authors = authorDAO.getAuthorsByBookId(book.getId());
-        book.setAuthors(authors);
-        
         // Load categories
         List<Category> categories = categoryDAO.getCategoriesByBookId(book.getId());
         book.setCategories(categories);
@@ -495,9 +482,9 @@ public class BookDAO {
             if (publisherDAO != null) {
                 publisherDAO.close();
             }
-            if (authorDAO != null) {
-                authorDAO.close();
-            }
+//            if (authorDAO != null) {
+//                authorDAO.close();
+//            }
             if (categoryDAO != null) {
                 categoryDAO.close();
             }

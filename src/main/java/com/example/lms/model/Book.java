@@ -10,6 +10,7 @@ import java.util.List;
 public class Book {
     private int id;
     private String title;
+    private String authorName;
     private String isbn;
     private int publisherId;
     private Publisher publisher;
@@ -21,29 +22,28 @@ public class Book {
     private String coverImageUrl;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private List<Author> authors;
     private List<Category> categories;
 
     // Default constructor
     public Book() {
-        this.authors = new ArrayList<>();
         this.categories = new ArrayList<>();
     }
 
     // Constructor with essential fields
-    public Book(String title, String isbn, int publisherId, int publicationYear) {
+    public Book(String title, String authorName, String isbn, int publisherId, int publicationYear) {
         this.title = title;
+        this.authorName = authorName;
         this.isbn = isbn;
         this.publisherId = publisherId;
         this.publicationYear = publicationYear;
-        this.authors = new ArrayList<>();
         this.categories = new ArrayList<>();
     }
 
     // Constructor with more fields
-    public Book(String title, String isbn, int publisherId, int publicationYear, 
+    public Book(String title, String authorName, String isbn, int publisherId, int publicationYear, 
                 String edition, String language, int pages, String description) {
         this.title = title;
+        this.authorName = authorName;
         this.isbn = isbn;
         this.publisherId = publisherId;
         this.publicationYear = publicationYear;
@@ -51,7 +51,6 @@ public class Book {
         this.language = language;
         this.pages = pages;
         this.description = description;
-        this.authors = new ArrayList<>();
         this.categories = new ArrayList<>();
     }
 
@@ -172,19 +171,12 @@ public class Book {
         this.updatedAt = updatedAt;
     }
 
-    public List<Author> getAuthors() {
-        return authors;
+    public String getAuthorName() {
+        return authorName;
     }
 
-    public void setAuthors(List<Author> authors) {
-        this.authors = authors;
-    }
-
-    public void addAuthor(Author author) {
-        if (this.authors == null) {
-            this.authors = new ArrayList<>();
-        }
-        this.authors.add(author);
+    public void setAuthorName(String authorName) {
+        this.authorName = authorName;
     }
 
     public List<Category> getCategories() {
@@ -207,6 +199,7 @@ public class Book {
         return "Book{" +
                 "id=" + id +
                 ", title='" + title + '\'' +
+                ", author='" + authorName + '\'' +
                 ", isbn='" + isbn + '\'' +
                 ", publicationYear=" + publicationYear +
                 '}';

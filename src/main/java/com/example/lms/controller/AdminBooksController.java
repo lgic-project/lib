@@ -78,13 +78,7 @@ public class AdminBooksController implements ChildController {
         // Set up table columns
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
-        authorColumn.setCellValueFactory(cellData -> {
-            List<Author> authors = cellData.getValue().getAuthors();
-            String authorNames = authors.stream()
-                    .map(Author::getName)
-                    .collect(Collectors.joining(", "));
-            return new SimpleStringProperty(authorNames);
-        });
+        authorColumn.setCellValueFactory(new PropertyValueFactory<>("author_name"));
         isbnColumn.setCellValueFactory(new PropertyValueFactory<>("isbn"));
         publisherColumn.setCellValueFactory(cellData -> 
             new SimpleStringProperty(cellData.getValue().getPublisher() != null ? 
@@ -287,11 +281,8 @@ public class AdminBooksController implements ChildController {
             details.append("Publisher: ").append(book.getPublisher().getName()).append("\n");
         }
         
-        if (!book.getAuthors().isEmpty()) {
-            details.append("Authors: ").append(book.getAuthors().stream()
-                    .map(Author::getName)
-                    .collect(Collectors.joining(", ")))
-                    .append("\n");
+        if (!book.getAuthorName().isEmpty()) {
+            details.append("Authors: ").append(book.getAuthorName()).append("\n");
         }
         
         if (!book.getCategories().isEmpty()) {
