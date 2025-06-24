@@ -10,6 +10,7 @@ public class User {
     private int id;
     private String name;
     private String email;
+    private String phone;
     private String password;
     private UserRole role;
     private LocalDateTime createdAt;
@@ -27,20 +28,22 @@ public class User {
     }
 
     // Constructor with essential fields
-    public User(String name, String email, String password, UserRole role) {
+    public User(String name, String email, String phone, String password, UserRole role) {
         this.name = name;
         this.email = email;
+        this.phone = phone;
         this.password = password;
         this.role = role;
     }
 
     // Constructor with all fields
-    public User(int id, String name, String email, String password, UserRole role,
+    public User(int id, String name, String email, String phone, String password, UserRole role,
                 LocalDateTime createdAt, LocalDateTime updatedAt, String resetToken,
                 LocalDateTime resetTokenExpiry) {
         this.id = id;
         this.name = name;
         this.email = email;
+        this.phone = phone;
         this.password = password;
         this.role = role;
         this.createdAt = createdAt;
@@ -72,6 +75,14 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+    
+    public String getPhone() {
+        return phone;
+    }
+    
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public String getPassword() {
@@ -128,6 +139,7 @@ public class User {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
+                ", phone='" + phone + '\'' +
                 ", role=" + role +
                 '}';
     }

@@ -417,7 +417,7 @@ public class ReservationDAO {
         
         Date expiryDate = rs.getDate("expiry_date");
         if (expiryDate != null) {
-            reservation.setExpiryDate(expiryDate.toLocalDate());
+            reservation.setExpiryDate(expiryDate.toLocalDate().atStartOfDay());
         }
         
         Date notificationDate = rs.getDate("notification_date");
