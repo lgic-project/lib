@@ -99,13 +99,13 @@ public class PublisherDAO {
      * @throws SQLException if database error occurs
      */
     public boolean addPublisher(Publisher publisher) throws SQLException {
-        String query = "INSERT INTO publishers (name, address, contact_email, contact_phone, website) VALUES (?, ?, ?, ?, ?)";
+        String query = "INSERT INTO publishers (name, address, email, phone, website) VALUES (?, ?, ?, ?, ?)";
         
         try (PreparedStatement stmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, publisher.getName());
             stmt.setString(2, publisher.getAddress());
-            stmt.setString(3, publisher.getContactEmail());
-            stmt.setString(4, publisher.getContactPhone());
+            stmt.setString(3, publisher.getEmail());
+            stmt.setString(4, publisher.getPhone());
             stmt.setString(5, publisher.getWebsite());
             
             int affectedRows = stmt.executeUpdate();
@@ -131,13 +131,13 @@ public class PublisherDAO {
      * @throws SQLException if database error occurs
      */
     public boolean updatePublisher(Publisher publisher) throws SQLException {
-        String query = "UPDATE publishers SET name = ?, address = ?, contact_email = ?, contact_phone = ?, website = ? WHERE id = ?";
+        String query = "UPDATE publishers SET name = ?, address = ?, email = ?, phone = ?, website = ? WHERE id = ?";
         
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, publisher.getName());
             stmt.setString(2, publisher.getAddress());
-            stmt.setString(3, publisher.getContactEmail());
-            stmt.setString(4, publisher.getContactPhone());
+            stmt.setString(3, publisher.getEmail());
+            stmt.setString(4, publisher.getPhone());
             stmt.setString(5, publisher.getWebsite());
             stmt.setInt(6, publisher.getId());
             
@@ -216,8 +216,8 @@ public class PublisherDAO {
         publisher.setId(rs.getInt("id"));
         publisher.setName(rs.getString("name"));
         publisher.setAddress(rs.getString("address"));
-        publisher.setContactEmail(rs.getString("contact_email"));
-        publisher.setContactPhone(rs.getString("contact_phone"));
+        publisher.setEmail(rs.getString("email"));
+        publisher.setPhone(rs.getString("phone"));
         publisher.setWebsite(rs.getString("website"));
         return publisher;
     }

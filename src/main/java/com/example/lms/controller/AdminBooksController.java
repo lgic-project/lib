@@ -78,7 +78,7 @@ public class AdminBooksController implements ChildController {
         // Set up table columns
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
-        authorColumn.setCellValueFactory(new PropertyValueFactory<>("author_name"));
+        authorColumn.setCellValueFactory(new PropertyValueFactory<>("authorName"));
         isbnColumn.setCellValueFactory(new PropertyValueFactory<>("isbn"));
         publisherColumn.setCellValueFactory(cellData -> 
             new SimpleStringProperty(cellData.getValue().getPublisher() != null ? 
