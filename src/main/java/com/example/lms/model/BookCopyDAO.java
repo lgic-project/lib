@@ -136,14 +136,14 @@ public class BookCopyDAO {
     public boolean addBookCopy(BookCopy copy) throws SQLException {
         // First determine the next copy number for this book
         int nextCopyNumber = getNextCopyNumber(copy.getBook().getId());
-        copy.setCopyNumber(nextCopyNumber);
+        copy.setCopyNumber(String.valueOf(nextCopyNumber));
         
         String query = "INSERT INTO book_copies (book_id, copy_number, acquisition_date, status, location, notes) " +
                       "VALUES (?, ?, ?, ?, ?, ?)";
         
         try (PreparedStatement stmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setInt(1, copy.getBook().getId());
-            stmt.setInt(2, copy.getCopyNumber());
+            stmt.setString(2, copy.getCopyNumber());
             
             if (copy.getAcquisitionDate() != null) {
                 stmt.setDate(3, Date.valueOf(copy.getAcquisitionDate()));
@@ -342,7 +342,7 @@ public class BookCopyDAO {
     private BookCopy extractBookCopyFromResultSet(ResultSet rs) throws SQLException {
         BookCopy copy = new BookCopy();
         copy.setId(rs.getInt("id"));
-        copy.setCopyNumber(rs.getInt("copy_number"));
+        copy.setCopyNumber(rs.getString("copy_number"));
         
         Date acquisitionDate = rs.getDate("acquisition_date");
         if (acquisitionDate != null) {

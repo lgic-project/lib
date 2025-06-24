@@ -2,6 +2,7 @@ package com.example.lms.model;
 
 import com.example.lms.util.Database;
 
+import java.math.BigDecimal;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -168,9 +169,9 @@ public class FineDAO {
                 stmt.setNull(2, Types.INTEGER);
             }
             
-            stmt.setDouble(3, fine.getAmount());
+            stmt.setBigDecimal(3, fine.getAmount());
             stmt.setDate(4, Date.valueOf(fine.getIssueDate()));
-            stmt.setString(5, fine.getReason());
+            stmt.setString(5, fine.getReason().toString());
             
             if (fine.getIssuedBy() != null) {
                 stmt.setInt(6, fine.getIssuedBy().getId());
@@ -265,9 +266,9 @@ public class FineDAO {
                 Fine fine = new Fine();
                 fine.setUser(borrowing.getUser());
                 fine.setBorrowing(borrowing);
-                fine.setAmount(amount);
+                fine.setAmount(new BigDecimal(amount));
                 fine.setIssueDate(today);
-                fine.setReason("Overdue book: " + daysOverdue + " days");
+                fine.setReason(Fine.Reason.LATE_RETURN);
                 fine.setIssuedBy(issuedBy);
                 
                 if (addFine(fine)) {
@@ -416,7 +417,7 @@ public class FineDAO {
     private Fine extractFineFromResultSet(ResultSet rs) throws SQLException {
         Fine fine = new Fine();
         fine.setId(rs.getInt("id"));
-        fine.setAmount(rs.getDouble("amount"));
+        fine.setAmount(rs.getBigDecimal("amount"));
         
         Date issueDate = rs.getDate("issue_date");
         if (issueDate != null) {
@@ -428,7 +429,7 @@ public class FineDAO {
             fine.setPaymentDate(paymentDate.toLocalDate());
         }
         
-        fine.setReason(rs.getString("reason"));
+        fine.setReason(Fine.parseReason(rs.getString("reason")));
         fine.setPaymentMethod(rs.getString("payment_method"));
         
         // Load related entities
@@ -467,9 +468,8 @@ public class FineDAO {
             }
             
             // Close related DAOs
-            if (userDAO != null) {
-                userDAO.close();
-            }
+            // UserDAO doesn't have close() method
+            // No need to close the userDAO here
             if (borrowingDAO != null) {
                 borrowingDAO.close();
             }

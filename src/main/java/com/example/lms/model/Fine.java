@@ -11,10 +11,15 @@ public class Fine {
     private int id;
     private int borrowingId;
     private Borrowing borrowing;
+    private User user;                // User who owes the fine
     private BigDecimal amount;
     private Reason reason;
     private PaymentStatus paymentStatus;
-    private LocalDate paymentDate;
+    private LocalDate issueDate;      // Date when fine was issued
+    private LocalDate paymentDate;    // Date when fine was paid
+    private String paymentMethod;     // Payment method used
+    private User issuedBy;           // Staff who issued the fine
+    private User receivedBy;         // Staff who received the payment
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -128,6 +133,46 @@ public class Fine {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+    
+    public User getUser() {
+        return user;
+    }
+    
+    public void setUser(User user) {
+        this.user = user;
+    }
+    
+    public LocalDate getIssueDate() {
+        return issueDate;
+    }
+    
+    public void setIssueDate(LocalDate issueDate) {
+        this.issueDate = issueDate;
+    }
+    
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+    
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+    
+    public User getIssuedBy() {
+        return issuedBy;
+    }
+    
+    public void setIssuedBy(User issuedBy) {
+        this.issuedBy = issuedBy;
+    }
+    
+    public User getReceivedBy() {
+        return receivedBy;
+    }
+    
+    public void setReceivedBy(User receivedBy) {
+        this.receivedBy = receivedBy;
     }
 
     // Mark as paid

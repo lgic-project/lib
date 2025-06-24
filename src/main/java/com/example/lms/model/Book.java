@@ -146,6 +146,15 @@ public class Book {
     public void setCoverImageUrl(String coverImageUrl) {
         this.coverImageUrl = coverImageUrl;
     }
+    
+    // Alias methods for coverImage (for compatibility with BookDAO)
+    public String getCoverImage() {
+        return getCoverImageUrl();
+    }
+    
+    public void setCoverImage(String coverImage) {
+        setCoverImageUrl(coverImage);
+    }
 
     public LocalDateTime getCreatedAt() {
         return createdAt;

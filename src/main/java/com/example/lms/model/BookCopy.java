@@ -121,6 +121,22 @@ public class BookCopy {
     public void setShelfLocation(String shelfLocation) {
         this.shelfLocation = shelfLocation;
     }
+    
+    /**
+     * Alias for getShelfLocation - used by BookCopyDAO
+     * @return shelf location
+     */
+    public String getLocation() {
+        return getShelfLocation();
+    }
+    
+    /**
+     * Alias for setShelfLocation - used by BookCopyDAO
+     * @param location shelf location
+     */
+    public void setLocation(String location) {
+        setShelfLocation(location);
+    }
 
     public String getNotes() {
         return notes;

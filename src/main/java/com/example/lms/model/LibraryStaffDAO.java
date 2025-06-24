@@ -144,7 +144,7 @@ public class LibraryStaffDAO {
                 stmt.setNull(4, Types.DATE);
             }
             
-            stmt.setDouble(5, staff.getSalary());
+            stmt.setBigDecimal(5, staff.getSalary());
             stmt.setString(6, staff.getOfficeNumber());
             stmt.setString(7, staff.getExtension());
             stmt.setString(8, staff.getEmergencyContact());
@@ -185,7 +185,7 @@ public class LibraryStaffDAO {
                 stmt.setNull(3, Types.DATE);
             }
             
-            stmt.setDouble(4, staff.getSalary());
+            stmt.setBigDecimal(4, staff.getSalary());
             stmt.setString(5, staff.getOfficeNumber());
             stmt.setString(6, staff.getExtension());
             stmt.setString(7, staff.getEmergencyContact());

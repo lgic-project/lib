@@ -92,6 +92,40 @@ public class Publisher {
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
+    
+    // Alias methods for contactEmail and contactPhone (for compatibility with PublisherDAO)
+    
+    /**
+     * Alias for getEmail - used by PublisherDAO
+     * @return email address
+     */
+    public String getContactEmail() {
+        return getEmail();
+    }
+    
+    /**
+     * Alias for setEmail - used by PublisherDAO
+     * @param contactEmail email address
+     */
+    public void setContactEmail(String contactEmail) {
+        setEmail(contactEmail);
+    }
+    
+    /**
+     * Alias for getPhone - used by PublisherDAO
+     * @return phone number
+     */
+    public String getContactPhone() {
+        return getPhone();
+    }
+    
+    /**
+     * Alias for setPhone - used by PublisherDAO
+     * @param contactPhone phone number
+     */
+    public void setContactPhone(String contactPhone) {
+        setPhone(contactPhone);
+    }
 
     @Override
     public String toString() {
