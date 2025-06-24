@@ -15,6 +15,9 @@ public class LibraryStaff {
     private String department;
     private LocalDate hireDate;
     private BigDecimal salary;
+    private String officeNumber;
+    private String extension;
+    private String emergencyContact;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -114,6 +117,30 @@ public class LibraryStaff {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+    
+    public String getOfficeNumber() {
+        return officeNumber;
+    }
+    
+    public void setOfficeNumber(String officeNumber) {
+        this.officeNumber = officeNumber;
+    }
+    
+    public String getExtension() {
+        return extension;
+    }
+    
+    public void setExtension(String extension) {
+        this.extension = extension;
+    }
+    
+    public String getEmergencyContact() {
+        return emergencyContact;
+    }
+    
+    public void setEmergencyContact(String emergencyContact) {
+        this.emergencyContact = emergencyContact;
     }
 
     @Override

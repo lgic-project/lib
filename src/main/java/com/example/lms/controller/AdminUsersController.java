@@ -153,12 +153,39 @@ public class AdminUsersController implements ChildController {
      */
     @FXML
     private void onAddUserClick() {
-        // In a real implementation, this would open a dialog to add a new user
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Add User");
-        alert.setHeaderText(null);
-        alert.setContentText("Add User functionality will be implemented here.");
-        alert.showAndWait();
+        try {
+            // Load the user dialog FXML
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/lms/views/user-dialog.fxml"));
+            Parent root = loader.load();
+            
+            // Get the controller and set up for add mode
+            UserDialogController controller = loader.getController();
+            controller.setupAddMode();
+            
+            // Create and configure the dialog stage
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Add User");
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(addUserBtn.getScene().getWindow());
+            dialogStage.setScene(new Scene(root));
+            
+            // Show dialog and wait for it to close
+            dialogStage.showAndWait();
+            
+            // If user was added successfully, refresh the table
+            if (controller.isSuccessful()) {
+                loadUsers();
+            }
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+            
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText(null);
+            alert.setContentText("Error loading user dialog: " + e.getMessage());
+            alert.showAndWait();
+        }
     }
     
     /**
@@ -223,12 +250,39 @@ public class AdminUsersController implements ChildController {
      * @param user The user to edit
      */
     private void editUser(User user) {
-        // In a real implementation, this would open a dialog to edit the user
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Edit User");
-        alert.setHeaderText(null);
-        alert.setContentText("Edit User functionality will be implemented here.\nUser: " + user.getName());
-        alert.showAndWait();
+        try {
+            // Load the user dialog FXML
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/lms/views/user-dialog.fxml"));
+            Parent root = loader.load();
+            
+            // Get the controller and set up for edit mode
+            UserDialogController controller = loader.getController();
+            controller.setupEditMode(user);
+            
+            // Create and configure the dialog stage
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Edit User");
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(addUserBtn.getScene().getWindow());
+            dialogStage.setScene(new Scene(root));
+            
+            // Show dialog and wait for it to close
+            dialogStage.showAndWait();
+            
+            // If user was edited successfully, refresh the table
+            if (controller.isSuccessful()) {
+                loadUsers();
+            }
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+            
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText(null);
+            alert.setContentText("Error loading user dialog: " + e.getMessage());
+            alert.showAndWait();
+        }
     }
     
     /**

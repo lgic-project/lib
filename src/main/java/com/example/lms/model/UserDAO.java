@@ -1,6 +1,6 @@
 package com.example.lms.model;
 
-import com.example.lms.util.DatabaseConnection;
+import com.example.lms.util.Database;
 import com.example.lms.util.SecurityUtil;
 
 import java.sql.*;
@@ -28,7 +28,7 @@ public class UserDAO {
         User user = null;
         
         try {
-            conn = DatabaseConnection.getConnection();
+            conn = Database.getConnection();
             String query = "SELECT * FROM users WHERE email = ?";
             stmt = conn.prepareStatement(query);
             stmt.setString(1, email);
@@ -66,7 +66,7 @@ public class UserDAO {
         boolean success = false;
         
         try {
-            conn = DatabaseConnection.getConnection();
+            conn = Database.getConnection();
             
             // Check if email already exists
             if (emailExists(conn, user.getEmail())) {
@@ -104,7 +104,7 @@ public class UserDAO {
         boolean exists = false;
         
         try {
-            conn = DatabaseConnection.getConnection();
+            conn = Database.getConnection();
             exists = emailExists(conn, email);
         } catch (SQLException e) {
             System.err.println("Error checking if email exists: " + e.getMessage());
@@ -159,7 +159,7 @@ public class UserDAO {
         String token = null;
         
         try {
-            conn = DatabaseConnection.getConnection();
+            conn = Database.getConnection();
             
             // Check if email exists
             if (!emailExists(conn, email)) {
@@ -211,7 +211,7 @@ public class UserDAO {
         boolean success = false;
         
         try {
-            conn = DatabaseConnection.getConnection();
+            conn = Database.getConnection();
             
             System.out.println("Attempting to reset password for email: " + email);
             System.out.println("Token: " + token);
@@ -254,6 +254,40 @@ public class UserDAO {
     }
     
     /**
+     * Get user by ID.
+     * 
+     * @param userId User's ID
+     * @return User object if found, null otherwise
+     */
+    public User getUserById(int userId) {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        User user = null;
+        
+        try {
+            conn = Database.getConnection();
+            String query = "SELECT * FROM users WHERE id = ?";
+            stmt = conn.prepareStatement(query);
+            stmt.setInt(1, userId);
+            
+            rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                user = mapResultSetToUser(rs);
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error getting user by ID: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            closeResources(rs, stmt, conn);
+        }
+        
+        return user;
+    }
+    
+    /**
      * Get user by email.
      * 
      * @param email User's email
@@ -266,7 +300,7 @@ public class UserDAO {
         User user = null;
         
         try {
-            conn = DatabaseConnection.getConnection();
+            conn = Database.getConnection();
             String query = "SELECT * FROM users WHERE email = ?";
             stmt = conn.prepareStatement(query);
             stmt.setString(1, email);
@@ -299,7 +333,7 @@ public class UserDAO {
         List<User> users = new ArrayList<>();
         
         try {
-            conn = DatabaseConnection.getConnection();
+            conn = Database.getConnection();
             String query = "SELECT * FROM users ORDER BY id";
             stmt = conn.prepareStatement(query);
             
@@ -317,6 +351,132 @@ public class UserDAO {
         }
         
         return users;
+    }
+    
+    /**
+     * Get users by role.
+     * 
+     * @param role Role to filter by ("Admin", "Librarian", "User"), if "All" or null, returns all users
+     * @return List of users with the specified role
+     * @throws SQLException if database error occurs
+     */
+    public List<User> getUsersByRole(String role) throws SQLException {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        List<User> users = new ArrayList<>();
+        
+        try {
+            conn = Database.getConnection();
+            String query;
+            
+            if (role == null || role.equalsIgnoreCase("All")) {
+                return getAllUsers();
+            } else {
+                query = "SELECT * FROM users WHERE role = ? ORDER BY id";
+                stmt = conn.prepareStatement(query);
+                stmt.setString(1, role);
+            }
+            
+            rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                users.add(mapResultSetToUser(rs));
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error getting users by role: " + e.getMessage());
+            throw e;
+        } finally {
+            closeResources(rs, stmt, conn);
+        }
+        
+        return users;
+    }
+    
+    /**
+     * Search users by name or email with optional role filter.
+     * 
+     * @param searchTerm Term to search in name or email
+     * @param role Optional role filter (if "All" or null, searches across all roles)
+     * @return List of matching users
+     * @throws SQLException if database error occurs
+     */
+    public List<User> searchUsers(String searchTerm, String role) throws SQLException {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        List<User> users = new ArrayList<>();
+        
+        try {
+            conn = Database.getConnection();
+            String query;
+            
+            // If search term is empty, just use role filter
+            if (searchTerm == null || searchTerm.trim().isEmpty()) {
+                return getUsersByRole(role);
+            }
+            
+            // Build query based on role filter
+            if (role == null || role.equalsIgnoreCase("All")) {
+                query = "SELECT * FROM users WHERE (name LIKE ? OR email LIKE ?) ORDER BY id";
+                stmt = conn.prepareStatement(query);
+                stmt.setString(1, "%" + searchTerm + "%");
+                stmt.setString(2, "%" + searchTerm + "%");
+            } else {
+                query = "SELECT * FROM users WHERE (name LIKE ? OR email LIKE ?) AND role = ? ORDER BY id";
+                stmt = conn.prepareStatement(query);
+                stmt.setString(1, "%" + searchTerm + "%");
+                stmt.setString(2, "%" + searchTerm + "%");
+                stmt.setString(3, role);
+            }
+            
+            rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                users.add(mapResultSetToUser(rs));
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error searching users: " + e.getMessage());
+            throw e;
+        } finally {
+            closeResources(rs, stmt, conn);
+        }
+        
+        return users;
+    }
+    
+    /**
+     * Get total number of users in the system.
+     * 
+     * @return Total number of users
+     */
+    public int getTotalUsers() {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        int count = 0;
+        
+        try {
+            conn = Database.getConnection();
+            String query = "SELECT COUNT(*) AS count FROM users";
+            stmt = conn.prepareStatement(query);
+            
+            rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                count = rs.getInt("count");
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error getting total users count: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            closeResources(rs, stmt, conn);
+        }
+        
+        return count;
     }
     
     /**
@@ -351,6 +511,89 @@ public class UserDAO {
         }
         
         return user;
+    }
+    
+    /**
+     * Update an existing user's information.
+     * 
+     * @param user User object with updated information (ID must be set)
+     * @return true if update successful, false otherwise
+     * @throws SQLException if database error occurs
+     */
+    public boolean updateUser(User user) throws SQLException {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        boolean success = false;
+        
+        try {
+            conn = Database.getConnection();
+            
+            // If password is empty, don't update it
+            String query;
+            if (user.getPassword() == null || user.getPassword().isEmpty()) {
+                query = "UPDATE users SET name = ?, email = ?, role = ?, updated_at = ? WHERE id = ?";
+                stmt = conn.prepareStatement(query);
+                stmt.setString(1, user.getName());
+                stmt.setString(2, user.getEmail());
+                stmt.setString(3, user.getRole().toString());
+                stmt.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
+                stmt.setInt(5, user.getId());
+            } else {
+                query = "UPDATE users SET name = ?, email = ?, password = ?, role = ?, updated_at = ? WHERE id = ?";
+                stmt = conn.prepareStatement(query);
+                stmt.setString(1, user.getName());
+                stmt.setString(2, user.getEmail());
+                stmt.setString(3, SecurityUtil.hashPassword(user.getPassword()));
+                stmt.setString(4, user.getRole().toString());
+                stmt.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
+                stmt.setInt(6, user.getId());
+            }
+            
+            int rowsAffected = stmt.executeUpdate();
+            success = (rowsAffected > 0);
+            
+        } catch (SQLException e) {
+            System.err.println("Error updating user: " + e.getMessage());
+            throw e;
+        } finally {
+            closeResources(null, stmt, conn);
+        }
+        
+        return success;
+    }
+    
+    /**
+     * Delete a user by ID.
+     * 
+     * @param userId ID of the user to delete
+     * @return true if deletion successful, false otherwise
+     * @throws SQLException if database error occurs
+     */
+    public boolean deleteUser(int userId) throws SQLException {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        boolean success = false;
+        
+        try {
+            conn = Database.getConnection();
+            
+            // Consider using transactions if checking for associated records
+            // or cascading deletes is required
+            String query = "DELETE FROM users WHERE id = ?";
+            stmt = conn.prepareStatement(query);
+            stmt.setInt(1, userId);
+            
+            int rowsAffected = stmt.executeUpdate();
+            success = (rowsAffected > 0);
+            
+        } catch (SQLException e) {
+            System.err.println("Error deleting user: " + e.getMessage());
+            throw e;
+        } finally {
+            closeResources(null, stmt, conn);
+        }
+        
+        return success;
     }
     
     /**

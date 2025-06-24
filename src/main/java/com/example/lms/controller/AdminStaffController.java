@@ -70,10 +70,12 @@ public class AdminStaffController implements ChildController {
         
         // Set up table columns
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        nameColumn.setCellValueFactory(cellData -> 
+                new SimpleStringProperty(cellData.getValue().getUser().getName()));
         positionColumn.setCellValueFactory(new PropertyValueFactory<>("position"));
         departmentColumn.setCellValueFactory(new PropertyValueFactory<>("department"));
-        emailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
+        emailColumn.setCellValueFactory(cellData -> 
+                new SimpleStringProperty(cellData.getValue().getUser().getEmail()));
         hireDateColumn.setCellValueFactory(cellData -> 
                 new SimpleStringProperty(cellData.getValue().getHireDate().format(dateFormatter)));
         
@@ -246,7 +248,7 @@ public class AdminStaffController implements ChildController {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Edit Staff");
         alert.setHeaderText(null);
-        alert.setContentText("Edit Staff functionality will be implemented here.\nStaff: " + staff.getName());
+        alert.setContentText("Edit Staff functionality will be implemented here.\nStaff: " + staff.getUser().getName());
         alert.showAndWait();
     }
     
@@ -259,7 +261,7 @@ public class AdminStaffController implements ChildController {
         // Ask for confirmation
         Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
         confirmation.setTitle("Delete Staff");
-        confirmation.setHeaderText("Delete Staff: " + staff.getName());
+        confirmation.setHeaderText("Delete Staff: " + staff.getUser().getName());
         confirmation.setContentText("Are you sure you want to delete this staff record? This action cannot be undone.");
         
         confirmation.showAndWait().ifPresent(response -> {
