@@ -492,6 +492,7 @@ public class UserDAO {
         user.setEmail(rs.getString("email"));
         user.setPassword(rs.getString("password"));
         user.setRole(User.UserRole.valueOf(rs.getString("role")));
+        user.setPhone(rs.getString("phone"));
         
         Timestamp createdAt = rs.getTimestamp("created_at");
         if (createdAt != null) {
@@ -531,22 +532,24 @@ public class UserDAO {
             // If password is empty, don't update it
             String query;
             if (user.getPassword() == null || user.getPassword().isEmpty()) {
-                query = "UPDATE users SET name = ?, email = ?, role = ?, updated_at = ? WHERE id = ?";
+                query = "UPDATE users SET name = ?, email = ?, role = ?, phone = ?, updated_at = ? WHERE id = ?";
                 stmt = conn.prepareStatement(query);
                 stmt.setString(1, user.getName());
                 stmt.setString(2, user.getEmail());
                 stmt.setString(3, user.getRole().toString());
-                stmt.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
-                stmt.setInt(5, user.getId());
+                stmt.setString(4, user.getPhone());
+                stmt.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
+                stmt.setInt(6, user.getId());
             } else {
-                query = "UPDATE users SET name = ?, email = ?, password = ?, role = ?, updated_at = ? WHERE id = ?";
+                query = "UPDATE users SET name = ?, email = ?, password = ?, role = ?, phone = ?, updated_at = ? WHERE id = ?";
                 stmt = conn.prepareStatement(query);
                 stmt.setString(1, user.getName());
                 stmt.setString(2, user.getEmail());
                 stmt.setString(3, SecurityUtil.hashPassword(user.getPassword()));
                 stmt.setString(4, user.getRole().toString());
-                stmt.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
-                stmt.setInt(6, user.getId());
+                stmt.setString(5, user.getPhone());
+                stmt.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now()));
+                stmt.setInt(7, user.getId());
             }
             
             int rowsAffected = stmt.executeUpdate();
