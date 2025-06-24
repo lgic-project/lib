@@ -32,28 +32,28 @@ public class ForgotPasswordController {
     private Button backToLoginBtn;
     
     @FXML
-    private Label errorLabel;
+    private Label statusLabel;
     
     @FXML
-    private Label successLabel;
+    private Label resetStatusLabel;
     
     @FXML
     private ImageView illustrationImg;
     
     @FXML
-    private VBox requestTokenForm;
+    private VBox emailFormContainer;
     
     @FXML
-    private VBox resetPasswordForm;
+    private VBox resetFormContainer;
     
     @FXML
-    private TextField tokenField;
+    private TextField resetTokenField;
     
     @FXML
     private PasswordField newPasswordField;
     
     @FXML
-    private PasswordField confirmPasswordField;
+    private PasswordField confirmNewPasswordField;
     
     @FXML
     private Button resetPasswordBtn;
@@ -74,9 +74,9 @@ public class ForgotPasswordController {
         userDAO = new UserDAO();
         emailUtil = new EmailUtil();
         
-        // Initially show only the request token form
-        requestTokenForm.setVisible(true);
-        resetPasswordForm.setVisible(false);
+        // Initially show only the email form
+        emailFormContainer.setVisible(true);
+        resetFormContainer.setVisible(false);
         
         // Load SVG image
         try {
@@ -132,14 +132,12 @@ public class ForgotPasswordController {
                 boolean emailSent = emailUtil.sendPasswordResetEmail(email, resetToken, user.getName());
                 
                 if (emailSent) {
-                    // Show success message and reveal the reset password form
-                    successLabel.setText("Reset code has been sent to your email address.");
-                    successLabel.setVisible(true);
-                    errorLabel.setVisible(false);
+                    // Switch to reset password form first
+                    emailFormContainer.setVisible(false);
+                    resetFormContainer.setVisible(true);
                     
-                    // Switch to reset password form
-                    requestTokenForm.setVisible(false);
-                    resetPasswordForm.setVisible(true);
+                    // Show success message on the reset form
+                    showResetSuccess("Reset code has been sent to your email address. Please check your inbox and enter the code above.");
                 } else {
                     showError("Failed to send reset email. Please try again later.");
                 }
@@ -157,33 +155,45 @@ public class ForgotPasswordController {
      */
     @FXML
     private void onResetPasswordClick() {
+        System.out.println("Reset password button clicked");
         String email = emailField.getText().trim();
-        String token = tokenField.getText().trim();
+        String token = resetTokenField.getText().trim();
         String newPassword = newPasswordField.getText();
-        String confirmPassword = confirmPasswordField.getText();
+        String confirmPassword = confirmNewPasswordField.getText();
+        
+        System.out.println("Email: " + email);
+        System.out.println("Token: " + token);
+        System.out.println("New password length: " + newPassword.length());
+        
+        // Clear previous error messages
+        resetStatusLabel.setVisible(false);
         
         // Validate inputs
         if (token.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()) {
-            showError("All fields are required.");
+            showResetError("All fields are required.");
             return;
         }
         
         if (newPassword.length() < 6) {
-            showError("Password must be at least 6 characters.");
+            showResetError("Password must be at least 6 characters.");
             return;
         }
         
         if (!newPassword.equals(confirmPassword)) {
-            showError("Passwords do not match.");
+            showResetError("Passwords do not match.");
             return;
         }
         
         // Attempt to reset password
         try {
+            System.out.println("Attempting to reset password with userDAO");
             boolean success = userDAO.resetPassword(email, token, newPassword);
+            System.out.println("Reset password result: " + success);
             
             if (success) {
                 // Password reset successful
+                showResetSuccess("Password reset successful!");
+                
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle("Password Reset Successful");
                 alert.setHeaderText(null);
@@ -193,11 +203,12 @@ public class ForgotPasswordController {
                 // Navigate back to login
                 onBackToLoginClick();
             } else {
-                showError("Invalid or expired reset code. Please try again.");
+                showResetError("Invalid or expired reset code. Please try again.");
             }
         } catch (Exception e) {
-            showError("Error during password reset: " + e.getMessage());
+            System.out.println("Exception during password reset: " + e.getMessage());
             e.printStackTrace();
+            showResetError("Error during password reset: " + e.getMessage());
         }
     }
     
@@ -222,6 +233,20 @@ public class ForgotPasswordController {
     }
     
     /**
+     * Handle back to email form button click.
+     * Returns from the reset password form to the email form.
+     */
+    @FXML
+    private void onBackToEmailFormClick() {
+        // Switch back to the email form
+        emailFormContainer.setVisible(true);
+        resetFormContainer.setVisible(false);
+        
+        // Clear any error or success messages
+        statusLabel.setVisible(false);
+    }
+    
+    /**
      * Validate email format.
      */
     private boolean isValidEmail(String email) {
@@ -229,11 +254,32 @@ public class ForgotPasswordController {
     }
     
     /**
-     * Show error message to the user.
+     * Show error message to the user on the email form.
      */
     private void showError(String message) {
-        errorLabel.setText(message);
-        errorLabel.setVisible(true);
-        successLabel.setVisible(false);
+        statusLabel.setText(message);
+        statusLabel.setVisible(true);
+        statusLabel.getStyleClass().clear();
+        statusLabel.getStyleClass().add("error-label");
+    }
+    
+    /**
+     * Show error message to the user on the reset password form.
+     */
+    private void showResetError(String message) {
+        resetStatusLabel.setText(message);
+        resetStatusLabel.setVisible(true);
+        resetStatusLabel.getStyleClass().clear();
+        resetStatusLabel.getStyleClass().add("error-label");
+    }
+    
+    /**
+     * Show success message to the user on the reset password form.
+     */
+    private void showResetSuccess(String message) {
+        resetStatusLabel.setText(message);
+        resetStatusLabel.setVisible(true);
+        resetStatusLabel.getStyleClass().clear();
+        resetStatusLabel.getStyleClass().add("success-label");
     }
 }

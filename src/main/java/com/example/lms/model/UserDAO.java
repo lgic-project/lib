@@ -197,14 +197,14 @@ public class UserDAO {
     }
     
     /**
-     * Reset password using token.
+     * Reset password using email and token.
      *
+     * @param email       User's email
      * @param token       Reset token
      * @param newPassword New password
-     * @param password
      * @return true if reset successful, false otherwise
      */
-    public boolean resetPassword(String token, String newPassword, String password) {
+    public boolean resetPassword(String email, String token, String newPassword) {
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -213,15 +213,21 @@ public class UserDAO {
         try {
             conn = DatabaseConnection.getConnection();
             
-            // Find user with the given token and check expiry
-            String query = "SELECT * FROM users WHERE reset_token = ? AND reset_token_expiry > ?";
-            stmt = conn.prepareStatement(query);
-            stmt.setString(1, token);
-            stmt.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+            System.out.println("Attempting to reset password for email: " + email);
+            System.out.println("Token: " + token);
             
+            // Find user with the given email, token and check expiry
+            String query = "SELECT * FROM users WHERE email = ? AND reset_token = ? AND reset_token_expiry > ?";
+            stmt = conn.prepareStatement(query);
+            stmt.setString(1, email);
+            stmt.setString(2, token);
+            stmt.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+            
+            System.out.println("Executing query: " + query);
             rs = stmt.executeQuery();
             
             if (rs.next()) {
+                System.out.println("Found user with ID: " + rs.getInt("id"));
                 // Update password
                 String updateQuery = "UPDATE users SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE id = ?";
                 PreparedStatement updateStmt = conn.prepareStatement(updateQuery);
@@ -230,8 +236,11 @@ public class UserDAO {
                 
                 int rowsAffected = updateStmt.executeUpdate();
                 success = (rowsAffected > 0);
+                System.out.println("Password update success: " + success);
                 
                 updateStmt.close();
+            } else {
+                System.out.println("No matching user found with the provided email and token");
             }
             
         } catch (SQLException e) {
