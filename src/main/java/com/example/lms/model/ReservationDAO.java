@@ -422,7 +422,7 @@ public class ReservationDAO {
         
         Date notificationDate = rs.getDate("notification_date");
         if (notificationDate != null) {
-            reservation.setNotificationDate(notificationDate.toLocalDate());
+            reservation.setNotificationDate(notificationDate.toLocalDate().atStartOfDay());
         }
         
         reservation.setStatus(Reservation.Status.valueOf(rs.getString("status")));
@@ -452,9 +452,6 @@ public class ReservationDAO {
             // Close related DAOs
             if (bookDAO != null) {
                 bookDAO.close();
-            }
-            if (userDAO != null) {
-                userDAO.close();
             }
         } catch (SQLException e) {
             System.err.println("Error closing ReservationDAO: " + e.getMessage());

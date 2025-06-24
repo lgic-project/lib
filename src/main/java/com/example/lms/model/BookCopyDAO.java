@@ -351,6 +351,54 @@ public class BookCopyDAO {
     }
     
     /**
+     * Get the count of available copies for a book
+     * 
+     * @param bookId Book ID
+     * @return Count of available copies
+     */
+    public int getAvailableCopiesCount(int bookId) {
+        String query = "SELECT COUNT(*) FROM book_copies WHERE book_id = ? AND status = 'AVAILABLE'";
+        
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, bookId);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting available copies count: " + e.getMessage());
+        }
+        
+        return 0;
+    }
+    
+    /**
+     * Get the total count of copies for a book
+     * 
+     * @param bookId Book ID
+     * @return Total count of copies
+     */
+    public int getTotalCopiesCount(int bookId) {
+        String query = "SELECT COUNT(*) FROM book_copies WHERE book_id = ?";
+        
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, bookId);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting total copies count: " + e.getMessage());
+        }
+        
+        return 0;
+    }
+    
+    /**
      * Helper method to extract a BookCopy object from a ResultSet
      * 
      * @param rs ResultSet containing book copy data

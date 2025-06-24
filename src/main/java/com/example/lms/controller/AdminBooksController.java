@@ -2,6 +2,7 @@ package com.example.lms.controller;
 
 import com.example.lms.model.*;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -90,12 +91,8 @@ public class AdminBooksController implements ChildController {
                     cellData.getValue().getPublisher().getName() : ""));
         yearColumn.setCellValueFactory(new PropertyValueFactory<>("publicationYear"));
         copiesColumn.setCellValueFactory(cellData -> {
-            try {
-                int count = bookCopyDAO.getAvailableCopiesCount(cellData.getValue().getId());
-                return new SimpleStringProperty(String.valueOf(count));
-            } catch (SQLException e) {
-                return new SimpleStringProperty("0");
-            }
+            int count = bookCopyDAO.getAvailableCopiesCount(cellData.getValue().getId());
+            return new SimpleObjectProperty<>(count);
         });
         
         // Set up action buttons
@@ -304,13 +301,9 @@ public class AdminBooksController implements ChildController {
                     .append("\n");
         }
         
-        try {
-            int availableCopies = bookCopyDAO.getAvailableCopiesCount(book.getId());
-            int totalCopies = bookCopyDAO.getTotalCopiesCount(book.getId());
-            details.append("Available Copies: ").append(availableCopies).append(" / ").append(totalCopies);
-        } catch (SQLException e) {
-            details.append("Error retrieving copy information");
-        }
+        int availableCopies = bookCopyDAO.getAvailableCopiesCount(book.getId());
+        int totalCopies = bookCopyDAO.getTotalCopiesCount(book.getId());
+        details.append("Available Copies: ").append(availableCopies).append(" / ").append(totalCopies);
         
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Book Details");

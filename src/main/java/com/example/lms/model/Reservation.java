@@ -16,6 +16,8 @@ public class Reservation {
     private Status status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String notes;
+    private LocalDateTime notificationDate;
 
     /**
      * Enum for reservation status
@@ -135,6 +137,22 @@ public class Reservation {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+    
+    public String getNotes() {
+        return notes;
+    }
+    
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+    
+    public LocalDateTime getNotificationDate() {
+        return notificationDate;
+    }
+    
+    public void setNotificationDate(LocalDateTime notificationDate) {
+        this.notificationDate = notificationDate;
     }
 
     // Update status based on dates

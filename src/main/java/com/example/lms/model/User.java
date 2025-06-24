@@ -17,6 +17,7 @@ public class User {
     private LocalDateTime updatedAt;
     private String resetToken;
     private LocalDateTime resetTokenExpiry;
+    private boolean active = true; // Default to active
 
     // Enum to represent user roles
     public enum UserRole {
@@ -39,7 +40,7 @@ public class User {
     // Constructor with all fields
     public User(int id, String name, String email, String phone, String password, UserRole role,
                 LocalDateTime createdAt, LocalDateTime updatedAt, String resetToken,
-                LocalDateTime resetTokenExpiry) {
+                LocalDateTime resetTokenExpiry, boolean active) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -50,6 +51,7 @@ public class User {
         this.updatedAt = updatedAt;
         this.resetToken = resetToken;
         this.resetTokenExpiry = resetTokenExpiry;
+        this.active = active;
     }
 
     // Getters and Setters
@@ -131,6 +133,14 @@ public class User {
 
     public void setResetTokenExpiry(LocalDateTime resetTokenExpiry) {
         this.resetTokenExpiry = resetTokenExpiry;
+    }
+    
+    public boolean isActive() {
+        return active;
+    }
+    
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     @Override
