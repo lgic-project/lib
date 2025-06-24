@@ -5,11 +5,13 @@ import com.example.lms.model.User;
 import com.example.lms.model.AppSettingDAO;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.BarChart;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -26,6 +28,24 @@ public class AdminDashboardController implements DashboardController {
     
     @FXML
     private Button logoutBtn;
+    
+    @FXML
+    private Button dashboardBtn;
+    
+    @FXML
+    private Button usersBtn;
+    
+    @FXML
+    private Button booksBtn;
+    
+    @FXML
+    private Button staffBtn;
+    
+    @FXML
+    private Button settingsBtn;
+    
+    @FXML
+    private StackPane contentArea;
     
     @FXML
     private PieChart categoryChart;
@@ -46,6 +66,9 @@ public class AdminDashboardController implements DashboardController {
         
         // Initialize charts with dummy data for now
         initializeCharts();
+        
+        // Set dashboard as the default view
+        loadDashboardView();
     }
     
     /**
@@ -103,39 +126,98 @@ public class AdminDashboardController implements DashboardController {
      * This would handle user management functions like adding, editing, or removing users.
      * For now, this is just a placeholder.
      */
-    private void manageUsers() {
-        // To be implemented
+    /**
+     * Event handler for dashboard button click
+     */
+    @FXML
+    private void onDashboardClick() {
+        setActiveButton(dashboardBtn);
+        loadDashboardView();
     }
     
     /**
-     * This would handle librarian management functions.
-     * For now, this is just a placeholder.
+     * Event handler for users button click
      */
-    private void manageLibrarians() {
-        // To be implemented
+    @FXML
+    private void onUsersClick() {
+        setActiveButton(usersBtn);
+        loadView("admin-users.fxml");
     }
     
     /**
-     * This would handle system settings management.
-     * For now, this is just a placeholder.
+     * Event handler for books button click
      */
-    private void manageSystemSettings() {
-        // To be implemented
+    @FXML
+    private void onBooksClick() {
+        setActiveButton(booksBtn);
+        loadView("admin-books.fxml");
     }
     
     /**
-     * This would handle generating various system reports.
-     * For now, this is just a placeholder.
+     * Event handler for staff button click
      */
-    private void generateReports() {
-        // To be implemented
+    @FXML
+    private void onStaffClick() {
+        setActiveButton(staffBtn);
+        loadView("admin-staff.fxml");
     }
     
     /**
-     * This would handle database backup and restore operations.
-     * For now, this is just a placeholder.
+     * Event handler for settings button click
      */
-    private void backupRestoreDatabase() {
-        // To be implemented
+    @FXML
+    private void onSettingsClick() {
+        setActiveButton(settingsBtn);
+        loadView("admin-settings.fxml");
+    }
+    
+    /**
+     * Loads the dashboard view into the content area
+     */
+    private void loadDashboardView() {
+        loadView("admin-home.fxml");
+    }
+    
+    /**
+     * Helper method to load a view into the content area
+     * 
+     * @param fxmlFile The FXML file to load
+     */
+    private void loadView(String fxmlFile) {
+        try {
+            FXMLLoader loader = new FXMLLoader(Main.class.getResource("views/" + fxmlFile));
+            Parent view = loader.load();
+            contentArea.getChildren().clear();
+            contentArea.getChildren().add(view);
+            
+            // If the loaded view has a controller that implements ChildController
+            Object controller = loader.getController();
+            if (controller instanceof ChildController) {
+                ((ChildController) controller).initData(currentUser);
+            }
+            
+        } catch (IOException e) {
+            System.err.println("Error loading view: " + fxmlFile);
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Sets the active button in the sidebar
+     * 
+     * @param activeButton The button to set as active
+     */
+    private void setActiveButton(Button activeButton) {
+        // Remove active class from all buttons
+        dashboardBtn.getStyleClass().remove("sidebar-button-active");
+        usersBtn.getStyleClass().remove("sidebar-button-active");
+        booksBtn.getStyleClass().remove("sidebar-button-active");
+        staffBtn.getStyleClass().remove("sidebar-button-active");
+        settingsBtn.getStyleClass().remove("sidebar-button-active");
+        
+        // Add active class to selected button
+        if (!activeButton.getStyleClass().contains("sidebar-button-active")) {
+            activeButton.getStyleClass().add("sidebar-button-active");
+        }
     }
 }

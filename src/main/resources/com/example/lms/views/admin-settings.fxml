@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="700.0" prefWidth="824.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.lms.controller.AdminSettingsController">
+   <children>
+      <VBox layoutX="14.0" layoutY="14.0" prefHeight="700.0" prefWidth="824.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+         </padding>
+         <children>
+            <Label text="System Settings">
+               <font>
+                  <Font name="System Bold" size="18.0" />
+               </font>
+               <VBox.margin>
+                  <Insets bottom="20.0" />
+               </VBox.margin>
+            </Label>
+            <HBox alignment="CENTER_LEFT" prefHeight="50.0" prefWidth="200.0" spacing="10.0">
+               <children>
+                  <Button fx:id="addSettingBtn" mnemonicParsing="false" onAction="#onAddSettingClick" styleClass="button-success" text="Add New Setting">
+                     <HBox.margin>
+                        <Insets right="20.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Button fx:id="backupBtn" mnemonicParsing="false" onAction="#onBackupClick" styleClass="button-primary" text="Backup Database">
+                     <HBox.margin>
+                        <Insets right="20.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Button fx:id="restoreBtn" mnemonicParsing="false" onAction="#onRestoreClick" styleClass="button-warning" text="Restore Database" />
+               </children>
+               <VBox.margin>
+                  <Insets bottom="20.0" />
+               </VBox.margin>
+            </HBox>
+            <TableView fx:id="settingsTable" prefHeight="550.0" prefWidth="784.0" styleClass="book-table" VBox.vgrow="ALWAYS">
+              <columns>
+                <TableColumn fx:id="settingKeyColumn" prefWidth="250.0" text="Setting Key" />
+                <TableColumn fx:id="settingValueColumn" prefWidth="350.0" text="Value" />
+                <TableColumn fx:id="actionsColumn" prefWidth="180.0" text="Actions" />
+              </columns>
+            </TableView>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>
