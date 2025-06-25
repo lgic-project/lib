@@ -194,6 +194,37 @@ public class Book {
         this.categories.add(category);
     }
 
+    /**
+     * Gets the category name for display purposes
+     * If multiple categories exist, returns the first one or "Uncategorized"
+     */
+    public String getCategoryName() {
+        if (categories != null && !categories.isEmpty()) {
+            return categories.get(0).getName();
+        }
+        return "Uncategorized";
+    }
+    
+    /**
+     * Gets the publisher name for display purposes
+     */
+    public String getPublisherName() {
+        if (publisher != null) {
+            return publisher.getName();
+        }
+        return "Unknown";
+    }
+    
+    /**
+     * Gets the number of available copies
+     * This is a placeholder until we implement proper book copy tracking
+     */
+    public int getAvailableCopies() {
+        // This would normally be calculated from the BookCopy table
+        // For now, we'll return a default value
+        return 1;
+    }
+    
     @Override
     public String toString() {
         return "Book{" +

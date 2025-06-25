@@ -49,6 +49,7 @@ public class BookDialogController {
     private ObservableList<Category> selectedCategories;
     private String uploadedImagePath = null;
     private boolean isImageChanged = false;
+    private BookDAO bookDAO;
 
     /**
      * Initialize the controller
@@ -380,6 +381,15 @@ public class BookDialogController {
             alert.setContentText("Failed to load publishers: " + e.getMessage());
             alert.showAndWait();
         }
+    }
+    
+    /**
+     * Set the BookDAO instance to be used by this controller
+     * 
+     * @param bookDAO the BookDAO instance to use
+     */
+    public void setBookDAO(BookDAO bookDAO) {
+        this.bookDAO = bookDAO;
     }
     
     /**

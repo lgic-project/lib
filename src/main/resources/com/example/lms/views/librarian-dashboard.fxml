@@ -95,29 +95,28 @@
                            <children>
                               <HBox alignment="CENTER_LEFT" prefHeight="50.0" prefWidth="756.0">
                                  <children>
-                                    <TextField prefHeight="40.0" prefWidth="400.0" promptText="Search books by title, author, or category...">
+                                    <Label text="Search:">
                                        <HBox.margin>
                                           <Insets right="10.0" />
+                                       </HBox.margin>
+                                    </Label>
+                                    <TextField fx:id="searchBookField" prefHeight="30.0" prefWidth="300.0" promptText="Search by title, author, or ISBN">
+                                       <HBox.margin>
+                                          <Insets right="20.0" />
                                        </HBox.margin>
                                     </TextField>
-                                    <Button mnemonicParsing="false" prefHeight="40.0" styleClass="button-primary" text="Search">
-                                       <HBox.margin>
-                                          <Insets right="10.0" />
-                                       </HBox.margin>
-                                    </Button>
-                                    <Button mnemonicParsing="false" prefHeight="40.0" styleClass="button-success" text="Add New Book" />
+                                    <Button fx:id="addBookButton" mnemonicParsing="false" prefHeight="40.0" styleClass="button-success" text="Add New Book" />
                                  </children>
                               </HBox>
-                              <TableView prefHeight="569.0" prefWidth="756.0" styleClass="book-table" VBox.vgrow="ALWAYS">
+                              <TableView fx:id="bookTableView" prefHeight="569.0" prefWidth="756.0" styleClass="book-table" VBox.vgrow="ALWAYS">
                                 <columns>
-                                  <TableColumn prefWidth="150.0" text="Title" />
-                                  <TableColumn prefWidth="120.0" text="Author" />
-                                    <TableColumn prefWidth="80.0" text="Category" />
-                                    <TableColumn prefWidth="60.0" text="Year" />
-                                    <TableColumn prefWidth="100.0" text="ISBN" />
-                                    <TableColumn prefWidth="60.0" text="Quantity" />
-                                    <TableColumn prefWidth="60.0" text="Available" />
-                                    <TableColumn prefWidth="150.0" text="Actions" />
+                                  <TableColumn fx:id="titleColumn" prefWidth="150.0" text="Title" />
+                                  <TableColumn fx:id="authorColumn" prefWidth="120.0" text="Author" />
+                                  <TableColumn fx:id="isbnColumn" prefWidth="80.0" text="ISBN" />
+                                  <TableColumn fx:id="categoryColumn" prefWidth="100.0" text="Category" />
+                                  <TableColumn fx:id="publisherColumn" prefWidth="110.0" text="Publisher" />
+                                  <TableColumn fx:id="availableColumn" prefWidth="45.0" text="Avail" />
+                                  <TableColumn fx:id="actionsColumn" prefWidth="150.0" text="Actions" />
                                 </columns>
                               </TableView>
                            </children>
