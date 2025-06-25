@@ -126,12 +126,15 @@ public class AdminBooksController implements ChildController {
                     private final Button editBtn = new Button("Edit");
                     private final Button viewBtn = new Button("View");
                     private final Button copiesBtn = new Button("Copies");
+                    private final Button deleteBtn = new Button("Delete");
                     
                     {
                         editBtn.getStyleClass().add("button-small");
                         viewBtn.getStyleClass().add("button-small");
                         copiesBtn.getStyleClass().add("button-small");
                         copiesBtn.getStyleClass().add("button-secondary");
+                        deleteBtn.getStyleClass().add("button-small");
+                        deleteBtn.getStyleClass().add("button-danger");
                         
                         editBtn.setOnAction(event -> {
                             Book book = getTableView().getItems().get(getIndex());
@@ -147,6 +150,11 @@ public class AdminBooksController implements ChildController {
                             Book book = getTableView().getItems().get(getIndex());
                             manageBookCopies(book);
                         });
+                        
+                        deleteBtn.setOnAction(event -> {
+                            Book book = getTableView().getItems().get(getIndex());
+                            deleteBook(book);
+                        });
                     }
                     
                     @Override
@@ -157,7 +165,7 @@ public class AdminBooksController implements ChildController {
                         } else {
                             // Create a container for the buttons
                             HBox hbox = new HBox(5);
-                            hbox.getChildren().addAll(viewBtn, editBtn, copiesBtn);
+                            hbox.getChildren().addAll(viewBtn, editBtn, copiesBtn, deleteBtn);
                             setGraphic(hbox);
                         }
                     }
@@ -449,5 +457,71 @@ public class AdminBooksController implements ChildController {
             alert.setContentText("Error: " + e.getMessage());
             alert.showAndWait();
         }
+    }
+    
+    /**
+     * Delete a book
+     * 
+     * @param book The book to delete
+     */
+    private void deleteBook(Book book) {
+        // Show confirmation dialog
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION, 
+                "Are you sure you want to delete the book '" + book.getTitle() + "'?", 
+                ButtonType.YES, ButtonType.NO);
+        confirmation.setTitle("Confirm Delete");
+        
+        // Handle user response
+        confirmation.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.YES) {
+                try {
+                    // Check if book has copies that are borrowed
+                    int copiesCount = bookCopyDAO.getTotalCopiesCount(book.getId());
+                    int availableCopiesCount = bookCopyDAO.getAvailableCopiesCount(book.getId());
+                    
+                    if (copiesCount > availableCopiesCount) {
+                        // Show error - cannot delete book with borrowed copies
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Cannot Delete");
+                        alert.setHeaderText(null);
+                        alert.setContentText("This book has copies that are currently borrowed. " +
+                                "All copies must be returned before deletion.");
+                        alert.showAndWait();
+                    } else {
+                        // Delete the book
+                        boolean success = bookDAO.deleteBook(book.getId());
+                        
+                        if (success) {
+                            // Show success message
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                            alert.setTitle("Success");
+                            alert.setHeaderText(null);
+                            alert.setContentText("Book deleted successfully!");
+                            alert.showAndWait();
+                            
+                            // Refresh the book list
+                            loadBooks();
+                        } else {
+                            // Show error message
+                            Alert alert = new Alert(Alert.AlertType.ERROR);
+                            alert.setTitle("Error");
+                            alert.setHeaderText(null);
+                            alert.setContentText("Failed to delete book. Please try again.");
+                            alert.showAndWait();
+                        }
+                    }
+                } catch (SQLException e) {
+                    System.err.println("Error deleting book: " + e.getMessage());
+                    e.printStackTrace();
+                    
+                    // Show error message with details
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Database Error");
+                    alert.setHeaderText("Failed to delete book");
+                    alert.setContentText("Error: " + e.getMessage());
+                    alert.showAndWait();
+                }
+            }
+        });
     }
 }
