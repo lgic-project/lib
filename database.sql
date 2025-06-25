@@ -111,6 +111,8 @@ CREATE TABLE IF NOT EXISTS borrowings (
     id INT AUTO_INCREMENT PRIMARY KEY,
     book_copy_id INT NOT NULL,
     user_id INT NOT NULL,
+    issued_by INT NULL,     -- Staff who issued the book
+    returned_to INT NULL,   -- Staff who received the returned book
     borrow_date DATE NOT NULL,
     due_date DATE NOT NULL,
     return_date DATE,
@@ -119,6 +121,8 @@ CREATE TABLE IF NOT EXISTS borrowings (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (book_copy_id) REFERENCES book_copies(id) ON DELETE RESTRICT,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT,
+    FOREIGN KEY (issued_by) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (returned_to) REFERENCES users(id) ON DELETE SET NULL,
     INDEX idx_borrowing_status (status),
     INDEX idx_borrowing_due_date (due_date)
 ) ENGINE=InnoDB;
