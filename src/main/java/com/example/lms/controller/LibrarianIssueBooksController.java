@@ -138,6 +138,7 @@ public class LibrarianIssueBooksController implements ChildController {
                 
                 // Update the borrowing record (mark as returned)
                 borrowing.setReturnDate(LocalDate.now());
+                borrowing.setReturnedTo(currentUser); // Set the current librarian as who received the book
                 borrowingDAO.updateBorrowing(borrowing);
                 
                 // Refresh data
