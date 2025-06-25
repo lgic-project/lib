@@ -54,6 +54,12 @@ public class LibrarianDashboardController implements DashboardController, AutoCl
     private Button logoutBtn;
     
     @FXML
+    private Button manageBooksBtn;
+    
+    @FXML
+    private Button issueBooksSidebarBtn;
+    
+    @FXML
     private TableView<Book> bookTableView;
     
     @FXML
@@ -201,7 +207,9 @@ public class LibrarianDashboardController implements DashboardController, AutoCl
             bookList = FXCollections.observableArrayList(books);
             bookTableView.setItems(bookList);
         } catch (SQLException e) {
-            showErrorAlert("Error Loading Books", "Could not load books from database: " + e.getMessage());
+            System.err.println("Error loading books: " + e.getMessage());
+            e.printStackTrace();
+            // showErrorAlert("Error Loading Books", "Could not load books from database: " + e.getMessage());
         }
     }
     
@@ -405,6 +413,30 @@ public class LibrarianDashboardController implements DashboardController, AutoCl
     }
     
     /**
+     * Sets the active button in the sidebar
+     * 
+     * @param activeButton The button to set as active
+     */
+    private void setActiveButton(Button activeButton) {
+        // Remove active class from all buttons
+        manageBooksBtn.getStyleClass().remove("sidebar-button-active");
+        issueBooksSidebarBtn.getStyleClass().remove("sidebar-button-active");
+        
+        // Add basic style to all buttons if they don't have it
+        if (!manageBooksBtn.getStyleClass().contains("sidebar-button")) {
+            manageBooksBtn.getStyleClass().add("sidebar-button");
+        }
+        if (!issueBooksSidebarBtn.getStyleClass().contains("sidebar-button")) {
+            issueBooksSidebarBtn.getStyleClass().add("sidebar-button");
+        }
+
+        // Add active class to selected button
+        if (!activeButton.getStyleClass().contains("sidebar-button-active")) {
+            activeButton.getStyleClass().add("sidebar-button-active");
+        }
+    }
+    
+    /**
      * Opens the issue book dialog
      */
     @FXML
@@ -451,6 +483,10 @@ public class LibrarianDashboardController implements DashboardController, AutoCl
             
             // Set the issue books view in the center of the main container
             mainContainer.setCenter(issueBooks);
+            
+            // Update active sidebar button
+            setActiveButton(issueBooksSidebarBtn);
+            
         } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Error", "Could not load Issue Books view", e.getMessage());
             e.printStackTrace();
@@ -510,6 +546,10 @@ public class LibrarianDashboardController implements DashboardController, AutoCl
             
             // Refresh the books data
             loadBooks();
+            
+            // Update active sidebar button
+            setActiveButton(manageBooksBtn);
+            
         } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Error", "Could not load Manage Books view", e.getMessage());
             e.printStackTrace();
