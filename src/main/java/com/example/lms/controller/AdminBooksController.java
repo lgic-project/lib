@@ -125,10 +125,13 @@ public class AdminBooksController implements ChildController {
                 return new TableCell<>() {
                     private final Button editBtn = new Button("Edit");
                     private final Button viewBtn = new Button("View");
+                    private final Button copiesBtn = new Button("Copies");
                     
                     {
                         editBtn.getStyleClass().add("button-small");
                         viewBtn.getStyleClass().add("button-small");
+                        copiesBtn.getStyleClass().add("button-small");
+                        copiesBtn.getStyleClass().add("button-secondary");
                         
                         editBtn.setOnAction(event -> {
                             Book book = getTableView().getItems().get(getIndex());
@@ -138,6 +141,11 @@ public class AdminBooksController implements ChildController {
                         viewBtn.setOnAction(event -> {
                             Book book = getTableView().getItems().get(getIndex());
                             viewBookDetails(book);
+                        });
+                        
+                        copiesBtn.setOnAction(event -> {
+                            Book book = getTableView().getItems().get(getIndex());
+                            manageBookCopies(book);
                         });
                     }
                     
@@ -149,7 +157,7 @@ public class AdminBooksController implements ChildController {
                         } else {
                             // Create a container for the buttons
                             HBox hbox = new HBox(5);
-                            hbox.getChildren().addAll(viewBtn, editBtn);
+                            hbox.getChildren().addAll(viewBtn, editBtn, copiesBtn);
                             setGraphic(hbox);
                         }
                     }
@@ -362,6 +370,39 @@ public class AdminBooksController implements ChildController {
      * @param book The book to save
      * @param isNewBook Whether this is a new book or an existing one being updated
      */
+    /**
+     * Open book copy management dialog
+     * 
+     * @param book The book to manage copies for
+     */
+    private void manageBookCopies(Book book) {
+        try {
+            // Load the dialog
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/lms/views/book-copy-dialog.fxml"));
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setDialogPane((DialogPane) loader.load());
+            dialog.setTitle("Manage Book Copies");
+            
+            // Get the controller and set the book and DAO
+            BookCopyDialogController controller = loader.getController();
+            controller.setBookCopyDAO(bookCopyDAO);
+            controller.setBook(book);
+            
+            // Show the dialog
+            dialog.showAndWait();
+            
+            // Refresh the book list to update copy counts
+            loadBooks();
+            
+        } catch (IOException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText(null);
+            alert.setContentText("Could not open book copies dialog: " + e.getMessage());
+            alert.showAndWait();
+        }
+    }
+    
     private void saveBook(Book book, boolean isNewBook) {
         try {
             boolean success;

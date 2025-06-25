@@ -131,6 +131,15 @@ public class BookCopy {
     }
     
     /**
+     * Get the title of the book associated with this copy
+     * 
+     * @return book title or "Unknown" if book is not set
+     */
+    public String getBookTitle() {
+        return (book != null) ? book.getTitle() : "Unknown";
+    }
+    
+    /**
      * Alias for setShelfLocation - used by BookCopyDAO
      * @param location shelf location
      */

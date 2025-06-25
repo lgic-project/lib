@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="650.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.lms.controller.LibrarianIssueBooksController">
+   <children>
+      <VBox prefHeight="650.0" prefWidth="800.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+         </padding>
+         <children>
+            <HBox alignment="CENTER_LEFT" prefHeight="50.0" prefWidth="756.0">
+               <children>
+                  <Label styleClass="section-header" text="Issue Books Management">
+                     <font>
+                        <Font name="System Bold" size="20.0" />
+                     </font>
+                  </Label>
+                  <HBox alignment="CENTER_RIGHT" spacing="10.0" HBox.hgrow="ALWAYS">
+                     <children>
+                        <Button fx:id="issueNewBookBtn" mnemonicParsing="false" onAction="#openIssueBookDialog" prefHeight="40.0" styleClass="button-success" text="Issue New Book" />
+                     </children>
+                  </HBox>
+               </children>
+               <VBox.margin>
+                  <Insets bottom="20.0" />
+               </VBox.margin>
+            </HBox>
+            <TableView fx:id="issuedBooksTableView" prefHeight="569.0" prefWidth="756.0" styleClass="book-table" VBox.vgrow="ALWAYS">
+              <columns>
+                <TableColumn fx:id="issuedBookTitleColumn" prefWidth="150.0" text="Book Title" />
+                <TableColumn fx:id="issuedMemberNameColumn" prefWidth="150.0" text="Member Name" />
+                <TableColumn fx:id="issuedDateColumn" prefWidth="120.0" text="Issue Date" />
+                <TableColumn fx:id="dueDateColumn" prefWidth="120.0" text="Due Date" />
+                <TableColumn fx:id="issuedActionsColumn" prefWidth="175.0" text="Actions" />
+              </columns>
+            </TableView>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>

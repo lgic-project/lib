@@ -14,7 +14,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="768.0" prefWidth="1024.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.lms.controller.LibrarianDashboardController">
+<BorderPane fx:id="mainContainer" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="768.0" prefWidth="1024.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.lms.controller.LibrarianDashboardController">
    <top>
       <HBox alignment="CENTER_LEFT" prefHeight="60.0" prefWidth="1024.0" styleClass="top-bar" BorderPane.alignment="CENTER">
          <children>
@@ -53,7 +53,7 @@
                   <Insets bottom="5.0" left="10.0" right="10.0" top="20.0" />
                </VBox.margin>
             </Button>
-            <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="sidebar-button" text="Issue Books">
+            <Button fx:id="issueBooksSidebarBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#showIssueBooksView" styleClass="sidebar-button" text="Issue Books">
                <VBox.margin>
                   <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
                </VBox.margin>
@@ -82,7 +82,7 @@
       </VBox>
    </left>
    <center>
-      <TabPane prefHeight="200.0" prefWidth="200.0" styleClass="tab-pane" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+      <TabPane fx:id="tabPane" prefHeight="200.0" prefWidth="200.0" styleClass="tab-pane" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
         <tabs>
           <Tab text="Manage Books">
             <content>
@@ -115,95 +115,10 @@
                                   <TableColumn fx:id="isbnColumn" prefWidth="80.0" text="ISBN" />
                                   <TableColumn fx:id="categoryColumn" prefWidth="100.0" text="Category" />
                                   <TableColumn fx:id="publisherColumn" prefWidth="110.0" text="Publisher" />
+                                  <TableColumn fx:id="copiesColumn" prefWidth="60.0" text="Copies" />
                                   <TableColumn fx:id="availableColumn" prefWidth="45.0" text="Avail" />
                                   <TableColumn fx:id="actionsColumn" prefWidth="150.0" text="Actions" />
                                 </columns>
-                              </TableView>
-                           </children>
-                        </VBox>
-                     </children>
-                  </AnchorPane>
-            </content>
-          </Tab>
-          <Tab text="Issue Books">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <VBox layoutX="14.0" layoutY="14.0" prefHeight="649.0" prefWidth="796.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <padding>
-                              <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-                           </padding>
-                           <children>
-                              <HBox alignment="CENTER_LEFT" prefHeight="150.0" prefWidth="756.0" styleClass="form-section">
-                                 <children>
-                                    <VBox prefHeight="150.0" prefWidth="500.0">
-                                       <children>
-                                          <Label text="Issue Book to Member">
-                                             <font>
-                                                <Font name="System Bold" size="16.0" />
-                                             </font>
-                                             <VBox.margin>
-                                                <Insets bottom="10.0" />
-                                             </VBox.margin>
-                                          </Label>
-                                          <HBox alignment="CENTER_LEFT" prefHeight="40.0">
-                                             <children>
-                                                <Label prefWidth="120.0" text="Member Email:">
-                                                   <HBox.margin>
-                                                      <Insets right="10.0" />
-                                                   </HBox.margin>
-                                                </Label>
-                                                <TextField prefHeight="30.0" prefWidth="250.0" />
-                                                <Button mnemonicParsing="false" prefHeight="30.0" styleClass="button-primary" text="Find">
-                                                   <HBox.margin>
-                                                      <Insets left="10.0" />
-                                                   </HBox.margin>
-                                                </Button>
-                                             </children>
-                                             <VBox.margin>
-                                                <Insets bottom="10.0" />
-                                             </VBox.margin>
-                                          </HBox>
-                                          <HBox alignment="CENTER_LEFT" prefHeight="40.0">
-                                             <children>
-                                                <Label prefWidth="120.0" text="Book ISBN:">
-                                                   <HBox.margin>
-                                                      <Insets right="10.0" />
-                                                   </HBox.margin>
-                                                </Label>
-                                                <TextField prefHeight="30.0" prefWidth="250.0" />
-                                                <Button mnemonicParsing="false" prefHeight="30.0" styleClass="button-primary" text="Find">
-                                                   <HBox.margin>
-                                                      <Insets left="10.0" />
-                                                   </HBox.margin>
-                                                </Button>
-                                             </children>
-                                          </HBox>
-                                       </children>
-                                    </VBox>
-                                    <VBox alignment="CENTER" prefHeight="150.0" prefWidth="256.0">
-                                       <children>
-                                          <Button mnemonicParsing="false" prefHeight="40.0" prefWidth="150.0" styleClass="button-success" text="Issue Book" />
-                                       </children>
-                                    </VBox>
-                                 </children>
-                              </HBox>
-                              <Label text="Recently Issued Books">
-                                 <font>
-                                    <Font name="System Bold" size="16.0" />
-                                 </font>
-                                 <VBox.margin>
-                                    <Insets bottom="10.0" top="20.0" />
-                                 </VBox.margin>
-                              </Label>
-                              <TableView prefHeight="409.0" prefWidth="756.0" styleClass="book-table" VBox.vgrow="ALWAYS">
-                                 <columns>
-                                    <TableColumn prefWidth="150.0" text="Book Title" />
-                                    <TableColumn prefWidth="150.0" text="Member Name" />
-                                    <TableColumn prefWidth="120.0" text="Issue Date" />
-                                    <TableColumn prefWidth="120.0" text="Due Date" />
-                                    <TableColumn prefWidth="175.0" text="Actions" />
-                                 </columns>
                               </TableView>
                            </children>
                         </VBox>

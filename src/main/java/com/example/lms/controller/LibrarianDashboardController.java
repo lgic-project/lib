@@ -1,20 +1,30 @@
 package com.example.lms.controller;
 
 import com.example.lms.Main;
-import com.example.lms.model.Book;
+import com.example.lms.model.*;
+import com.example.lms.model.BookCopy;
+import com.example.lms.model.BookCopyDAO;
 import com.example.lms.model.BookDAO;
+import com.example.lms.model.Borrowing;
+import com.example.lms.model.BorrowingDAO;
 import com.example.lms.model.User;
+import com.example.lms.model.UserDAO;
 import com.example.lms.util.Database;
+import com.example.lms.util.AppSettings;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
@@ -27,7 +37,9 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Controller for the librarian dashboard.
@@ -60,10 +72,16 @@ public class LibrarianDashboardController implements DashboardController, AutoCl
     private TableColumn<Book, String> publisherColumn;
     
     @FXML
+    private TableColumn<Book, Integer> copiesColumn;
+    
+    @FXML
     private TableColumn<Book, Integer> availableColumn;
     
     @FXML
     private TableColumn<Book, String> actionsColumn;
+    
+    @FXML
+    private TabPane tabPane;
     
     @FXML
     private TextField searchBookField;
@@ -71,8 +89,18 @@ public class LibrarianDashboardController implements DashboardController, AutoCl
     @FXML
     private Button addBookButton;
     
+    // Main container for dynamic content loading
+    @FXML
+    private BorderPane mainContainer;
+    
     private User currentUser;
     private BookDAO bookDAO;
+    private BookCopyDAO bookCopyDAO;
+    private UserDAO userDAO;
+    private BorrowingDAO borrowingDAO;
+    
+    // Current child controller for view switching
+    private ChildController currentChildController;
     private ObservableList<Book> bookList;
     
     /**
@@ -82,25 +110,32 @@ public class LibrarianDashboardController implements DashboardController, AutoCl
     @FXML
     private void initialize() {
         try {
-            // Initialize BookDAO
+            // Initialize DAOs
             Connection conn = Database.getConnection();
             bookDAO = new BookDAO();
+            bookCopyDAO = new BookCopyDAO();
+            userDAO = new UserDAO();
+            borrowingDAO = new BorrowingDAO();
             
-            // Setup table columns
+            // Setup book table columns
             titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
             authorColumn.setCellValueFactory(new PropertyValueFactory<>("authorName"));
             isbnColumn.setCellValueFactory(new PropertyValueFactory<>("isbn"));
-            categoryColumn.setCellValueFactory(new PropertyValueFactory<>("categoryName"));
-            publisherColumn.setCellValueFactory(new PropertyValueFactory<>("publisherName"));
-            availableColumn.setCellValueFactory(new PropertyValueFactory<>("availableCopies"));
+            categoryColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCategoryName()));
+            publisherColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getPublisherName()));
             
-            // Setup action buttons
+            // Add available copies column using BookCopyDAO
+            copiesColumn.setCellValueFactory(cellData -> {
+                int count = bookCopyDAO.getAvailableCopiesCount(cellData.getValue().getId());
+                return new SimpleObjectProperty<>(count);
+            });
+            
             setupActionColumn();
             
-            // Load books
+            // Load data
             loadBooks();
             
-            // Setup search functionality
+            // Set up search functionality
             searchBookField.textProperty().addListener((observable, oldValue, newValue) -> {
                 try {
                     searchBooks(newValue);
@@ -111,6 +146,9 @@ public class LibrarianDashboardController implements DashboardController, AutoCl
             
             // Setup add book button
             addBookButton.setOnAction(this::handleAddBook);
+            
+            // Set up Issue Books sidebar button
+            // Button is now wired via FXML onAction attribute
             
         } catch (SQLException e) {
             showErrorAlert("Database Error", "Could not connect to the database: " + e.getMessage());
@@ -174,12 +212,14 @@ public class LibrarianDashboardController implements DashboardController, AutoCl
         actionsColumn.setCellFactory(param -> new TableCell<>() {
             private final Button viewBtn = new Button("View");
             private final Button editBtn = new Button("Edit");
+            private final Button copiesBtn = new Button("Copies");
             private final Button deleteBtn = new Button("Delete");
-            private final HBox buttons = new HBox(5, viewBtn, editBtn, deleteBtn);
+            private final HBox buttons = new HBox(5, viewBtn, editBtn, copiesBtn, deleteBtn);
             
             {
                 viewBtn.getStyleClass().add("button-info");
                 editBtn.getStyleClass().add("button-primary");
+                copiesBtn.getStyleClass().add("button-secondary");
                 deleteBtn.getStyleClass().add("button-danger");
                 
                 viewBtn.setOnAction(event -> {
@@ -190,6 +230,11 @@ public class LibrarianDashboardController implements DashboardController, AutoCl
                 editBtn.setOnAction(event -> {
                     Book book = getTableView().getItems().get(getIndex());
                     editBook(book);
+                });
+                
+                copiesBtn.setOnAction(event -> {
+                    Book book = getTableView().getItems().get(getIndex());
+                    manageBookCopies(book);
                 });
                 
                 deleteBtn.setOnAction(event -> {
@@ -360,19 +405,86 @@ public class LibrarianDashboardController implements DashboardController, AutoCl
     }
     
     /**
-     * This would contain methods to handle book issuance to members.
-     * For now, this is just a placeholder.
+     * Opens the issue book dialog
      */
-    private void issueBook() {
-        // To be implemented
+    @FXML
+    private void openIssueBookDialog() throws IOException {
+        // Load the dialog
+        FXMLLoader loader = new FXMLLoader(Main.class.getResource("views/issue-book-dialog.fxml"));
+        DialogPane dialogPane = loader.load();
+        
+        // Create the dialog
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setDialogPane(dialogPane);
+        dialog.setTitle("Issue Book");
+        
+        // Get the controller
+        IssueBookDialogController controller = loader.getController();
+        controller.setCurrentUser(currentUser);
+        
+        // Show the dialog and process result
+        Optional<ButtonType> result = dialog.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            // Refresh books view
+            loadBooks();
+        }
+    }
+     /**
+     * Shows the Issue Books view by loading the librarian-issue-books.fxml into the main content area
+     */
+    @FXML
+    private void showIssueBooksView() {
+        try {
+            // First close the current view/controller if applicable
+            closeCurrentChildController();
+            
+            // Load the Issue Books view
+            FXMLLoader loader = new FXMLLoader(Main.class.getResource("views/librarian-issue-books.fxml"));
+            Node issueBooks = loader.load();
+            
+            // Set the current child controller
+            currentChildController = loader.getController();
+            
+            // Set the current user in the controller
+            LibrarianIssueBooksController controller = loader.getController();
+            controller.initData(currentUser);
+            
+            // Set the issue books view in the center of the main container
+            mainContainer.setCenter(issueBooks);
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Could not load Issue Books view", e.getMessage());
+            e.printStackTrace();
+        }
     }
     
     /**
-     * This would contain methods to handle book returns from members.
-     * For now, this is just a placeholder.
+     * Closes the current child controller if it exists
      */
-    private void returnBook() {
-        // To be implemented
+    private void closeCurrentChildController() {
+        if (currentChildController != null) {
+            try {
+                currentChildController.close();
+                currentChildController = null;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    /**
+     * Shows an alert dialog
+     *
+     * @param alertType The type of alert
+     * @param title The alert title
+     * @param header The alert header
+     * @param content The alert content
+     */
+    private void showAlert(Alert.AlertType alertType, String title, String header, String content) {
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
     
     /**
@@ -386,6 +498,35 @@ public class LibrarianDashboardController implements DashboardController, AutoCl
     /**
      * Closes resources used by this controller.
      */
+    /**
+     * Open the book copy management dialog for a book
+     * 
+     * @param book The book to manage copies for
+     */
+    private void manageBookCopies(Book book) {
+        try {
+            // Load the dialog
+            FXMLLoader loader = new FXMLLoader(Main.class.getResource("views/book-copy-dialog.fxml"));
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setDialogPane((DialogPane) loader.load());
+            dialog.setTitle("Manage Book Copies");
+            
+            // Get the controller and set the book and DAO
+            BookCopyDialogController controller = loader.getController();
+            controller.setBookCopyDAO(bookCopyDAO);
+            controller.setBook(book);
+            
+            // Show the dialog
+            dialog.showAndWait();
+            
+            // Refresh the book list to show updated copy counts
+            loadBooks();
+            
+        } catch (IOException e) {
+            showErrorAlert("Error", "Could not open book copies dialog: " + e.getMessage());
+        }
+    }
+    
     @Override
     public void close() throws Exception {
         if (bookDAO != null) {
@@ -393,6 +534,30 @@ public class LibrarianDashboardController implements DashboardController, AutoCl
                 bookDAO.close();
             } catch (SQLException e) {
                 System.err.println("Error closing BookDAO: " + e.getMessage());
+            }
+        }
+        
+        if (bookCopyDAO != null) {
+            try {
+                bookCopyDAO.close();
+            } catch (SQLException e) {
+                System.err.println("Error closing BookCopyDAO: " + e.getMessage());
+            }
+        }
+        
+        if (userDAO != null) {
+            try {
+                userDAO.close();
+            } catch (SQLException e) {
+                System.err.println("Error closing UserDAO: " + e.getMessage());
+            }
+        }
+        
+        if (borrowingDAO != null) {
+            try {
+                borrowingDAO.close();
+            } catch (SQLException e) {
+                System.err.println("Error closing BorrowingDAO: " + e.getMessage());
             }
         }
     }

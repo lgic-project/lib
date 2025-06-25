@@ -166,7 +166,7 @@ public class BookCopyDAO {
             copy.setAcquisitionDate(LocalDate.now());
         }
         
-        String query = "INSERT INTO book_copies (book_id, copy_number, acquisition_date, status, location, notes) " +
+        String query = "INSERT INTO book_copies (book_id, copy_number, acquisition_date, status, shelf_location, notes) " +
                        "VALUES (?, ?, ?, ?, ?, ?)";
         
         try (PreparedStatement stmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
@@ -225,7 +225,7 @@ public class BookCopyDAO {
      */
     public boolean updateBookCopy(BookCopy copy) throws SQLException {
         String query = "UPDATE book_copies SET book_id = ?, copy_number = ?, acquisition_date = ?, status = ?, " +
-                       "location = ?, notes = ? WHERE id = ?";
+                       "shelf_location = ?, notes = ? WHERE id = ?";
         
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, copy.getBook().getId());
@@ -416,7 +416,7 @@ public class BookCopyDAO {
         }
         
         copy.setStatus(BookCopy.Status.valueOf(rs.getString("status")));
-        copy.setLocation(rs.getString("location"));
+        copy.setLocation(rs.getString("shelf_location"));
         copy.setNotes(rs.getString("notes"));
         
         // Load the related book

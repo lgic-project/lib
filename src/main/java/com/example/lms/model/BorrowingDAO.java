@@ -420,7 +420,7 @@ public class BorrowingDAO {
         borrowing.setId(rs.getInt("id"));
         
         // Get the book copy
-        int copyId = rs.getInt("copy_id");
+        int copyId = rs.getInt("book_copy_id");
         BookCopy bookCopy = bookCopyDAO.getBookCopyById(copyId);
         borrowing.setBookCopy(bookCopy);
         
@@ -429,18 +429,26 @@ public class BorrowingDAO {
         User user = userDAO.getUserById(userId);
         borrowing.setUser(user);
         
-        // Get the issued by staff if available
-        int issuedById = rs.getInt("issued_by");
-        if (!rs.wasNull()) {
-            User issuedBy = userDAO.getUserById(issuedById);
-            borrowing.setIssuedBy(issuedBy);
+        // Get the issued by staff if available - check if column exists first
+        try {
+            int issuedById = rs.getInt("issued_by");
+            if (!rs.wasNull()) {
+                User issuedBy = userDAO.getUserById(issuedById);
+                borrowing.setIssuedBy(issuedBy);
+            }
+        } catch (SQLException e) {
+            // Column doesn't exist in the schema, skip it
         }
         
-        // Get the returned to staff if available
-        int returnedToId = rs.getInt("returned_to");
-        if (!rs.wasNull()) {
-            User returnedTo = userDAO.getUserById(returnedToId);
-            borrowing.setReturnedTo(returnedTo);
+        // Get the returned to staff if available - check if column exists first
+        try {
+            int returnedToId = rs.getInt("returned_to");
+            if (!rs.wasNull()) {
+                User returnedTo = userDAO.getUserById(returnedToId);
+                borrowing.setReturnedTo(returnedTo);
+            }
+        } catch (SQLException e) {
+            // Column doesn't exist in the schema, skip it
         }
         
         // Get the dates
@@ -510,6 +518,47 @@ public List<Map<String, String>> getRecentBorrowingActivities(int limit) throws 
     }
     
     return activities;
+}
+
+/**
+ * Update a borrowing record
+ * 
+ * @param borrowing The borrowing record to update
+ * @return true if successful, false otherwise
+ * @throws SQLException if database error occurs
+ */
+public boolean updateBorrowing(Borrowing borrowing) throws SQLException {
+    String query = "UPDATE borrowings SET return_date = ?, returned_to = ?, updated_at = NOW() WHERE id = ?";
+    
+    try (PreparedStatement stmt = connection.prepareStatement(query)) {
+        if (borrowing.getReturnDate() != null) {
+            stmt.setDate(1, Date.valueOf(borrowing.getReturnDate()));
+        } else {
+            stmt.setNull(1, Types.DATE);
+        }
+        
+        if (borrowing.getReturnedTo() != null) {
+            stmt.setInt(2, borrowing.getReturnedTo().getId());
+        } else {
+            stmt.setNull(2, Types.INTEGER);
+        }
+        
+        stmt.setInt(3, borrowing.getId());
+        
+        int rowsUpdated = stmt.executeUpdate();
+        return rowsUpdated > 0;
+    }
+}
+
+/**
+ * Get current borrowings (books that have been borrowed and not returned yet)
+ * 
+ * @return List of current borrowings
+ * @throws SQLException if database error occurs
+ */
+public List<Borrowing> getCurrentBorrowings() throws SQLException {
+    // This is functionally identical to getActiveBorrowings, but provided for semantic clarity
+    return getActiveBorrowings();
 }
 
 /**

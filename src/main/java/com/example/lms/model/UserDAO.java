@@ -606,9 +606,19 @@ public class UserDAO {
         try {
             if (rs != null) rs.close();
             if (stmt != null) stmt.close();
-            if (conn != null) conn.close();
+            if (conn != null) Database.releaseConnection(); // Call without parameters as it manages connection internally
         } catch (SQLException e) {
             System.err.println("Error closing resources: " + e.getMessage());
         }
+    }
+    
+    /**
+     * Close the database connection properly.
+     * 
+     * @throws SQLException if a database access error occurs
+     */
+    public void close() throws SQLException {
+        // Connection is obtained and released on a per-method basis
+        // so we don't need to close a permanent connection
     }
 }
