@@ -384,13 +384,11 @@ public class BookDialogController {
     
     /**
      * Clean up resources when dialog is closed
+     * Note: We don't close DAOs here as they might be used by the parent controller
      */
     public void close() {
-        if (publisherDAO != null) {
-            publisherDAO.close();
-        }
-        if (categoryDAO != null) {
-            categoryDAO.close();
-        }
+        // Only clean up resources that are specific to this dialog
+        // No need to close DAOs as they're managed by the parent controller
+        // or will be garbage collected when no longer referenced
     }
 }
