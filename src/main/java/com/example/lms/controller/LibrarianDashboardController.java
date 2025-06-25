@@ -13,10 +13,17 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import javafx.geometry.Insets;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -238,23 +245,27 @@ public class LibrarianDashboardController implements DashboardController, AutoCl
     
     /**
      * View book details
+     * 
+     * @param book The book to view
      */
     private void viewBookDetails(Book book) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Book Details");
-        alert.setHeaderText(book.getTitle());
-        
-        StringBuilder content = new StringBuilder();
-        content.append("ISBN: ").append(book.getIsbn()).append("\n");
-        content.append("Author: ").append(book.getAuthorName()).append("\n");
-        content.append("Category: ").append(book.getCategoryName()).append("\n");
-        content.append("Publisher: ").append(book.getPublisherName()).append("\n");
-        content.append("Publication Year: ").append(book.getPublicationYear()).append("\n");
-        content.append("Available Copies: ").append(book.getAvailableCopies()).append("\n");
-        content.append("Description: ").append(book.getDescription()).append("\n");
-        
-        alert.setContentText(content.toString());
-        alert.showAndWait();
+        try {
+            // Load the book details dialog
+            FXMLLoader loader = new FXMLLoader(Main.class.getResource("views/book-details-dialog.fxml"));
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setDialogPane((DialogPane) loader.load());
+            dialog.setTitle("Book Details");
+            
+            // Get the controller and set the book
+            BookDetailsController controller = loader.getController();
+            controller.setBook(book);
+            
+            // Show the dialog
+            dialog.showAndWait();
+            
+        } catch (IOException e) {
+            showErrorAlert("Error", "Could not open book details dialog: " + e.getMessage());
+        }
     }
     
     /**

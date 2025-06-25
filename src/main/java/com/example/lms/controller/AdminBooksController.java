@@ -332,85 +332,28 @@ public class AdminBooksController implements ChildController {
      * @param book The book to view
      */
     private void viewBookDetails(Book book) {
-        // Create a custom dialog with image and text
-        Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle("Book Details");
-        dialog.setHeaderText(book.getTitle());
-        
-        // Create a grid for organizing content
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(20, 150, 10, 10));
-        
-        // Create image view for cover
-        ImageView coverView = new ImageView();
-        coverView.setFitHeight(200);
-        coverView.setFitWidth(150);
-        coverView.setPreserveRatio(true);
-        
-        // Set cover image if available
-        String coverPath = book.getCoverImage();
-        if (coverPath != null && !coverPath.isEmpty()) {
-            try {
-                Image image = new Image(getClass().getResourceAsStream(coverPath));
-                coverView.setImage(image);
-            } catch (Exception e) {
-                System.err.println("Error loading book cover: " + e.getMessage());
-                coverView.setStyle("-fx-background-color: lightgray;");
-            }
-        } else {
-            coverView.setStyle("-fx-background-color: lightgray;");
+        try {
+            // Load the book details dialog
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/lms/views/book-details-dialog.fxml"));
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setDialogPane((DialogPane) loader.load());
+            dialog.setTitle("Book Details");
+            
+            // Get the controller and set the book
+            BookDetailsController controller = loader.getController();
+            controller.setBook(book);
+            
+            // Show the dialog
+            dialog.showAndWait();
+            
+        } catch (IOException e) {
+            // Show error message
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText(null);
+            alert.setContentText("Could not open book details dialog: " + e.getMessage());
+            alert.showAndWait();
         }
-        
-        // Build the details text
-        StringBuilder details = new StringBuilder();
-        details.append("ISBN: ").append(book.getIsbn()).append("\n\n");
-        details.append("Publication Year: ").append(book.getPublicationYear()).append("\n\n");
-        
-        if (book.getPublisher() != null) {
-            details.append("Publisher: ").append(book.getPublisher().getName()).append("\n\n");
-        }
-        
-        if (!book.getAuthorName().isEmpty()) {
-            details.append("Author: ").append(book.getAuthorName()).append("\n\n");
-        }
-        
-        if (!book.getCategories().isEmpty()) {
-            details.append("Categories: ").append(book.getCategories().stream()
-                    .map(Category::getName)
-                    .collect(Collectors.joining(", ")))
-                    .append("\n\n");
-        }
-        
-        // Add book status
-        int availableCopies = bookCopyDAO.getAvailableCopiesCount(book.getId());
-        int totalCopies = bookCopyDAO.getTotalCopiesCount(book.getId());
-        details.append("Available Copies: ").append(availableCopies).append(" / ").append(totalCopies);
-
-        // Add description if available
-        if (book.getDescription() != null && !book.getDescription().isEmpty()) {
-            details.append("\n\n").append("Description:\n").append(book.getDescription());
-        }
-        
-        // Add elements to grid
-        grid.add(coverView, 0, 0, 1, 2);
-        
-        TextArea detailsArea = new TextArea(details.toString());
-        detailsArea.setEditable(false);
-        detailsArea.setWrapText(true);
-        detailsArea.setPrefWidth(300);
-        detailsArea.setPrefHeight(250);
-        grid.add(detailsArea, 1, 0);
-        
-        // Set the dialog content
-        dialog.getDialogPane().setContent(grid);
-        
-        // Add close button
-        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
-        
-        // Show the dialog
-        dialog.showAndWait();
     }
     
     /**
