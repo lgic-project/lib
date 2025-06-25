@@ -116,48 +116,21 @@ public class LibrarianDashboardController implements DashboardController, AutoCl
     @FXML
     private void initialize() {
         try {
-            // Initialize DAOs
-            Connection conn = Database.getConnection();
-            bookDAO = new BookDAO();
-            bookCopyDAO = new BookCopyDAO();
+            // Initialize only necessary DAOs for the librarian dashboard
+            // We don't need to initialize the book-related DAOs here as they will be
+            // managed by the AdminBooksController when loaded
             userDAO = new UserDAO();
             borrowingDAO = new BorrowingDAO();
             
-            // Setup book table columns
-            titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
-            authorColumn.setCellValueFactory(new PropertyValueFactory<>("authorName"));
-            isbnColumn.setCellValueFactory(new PropertyValueFactory<>("isbn"));
-            categoryColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCategoryName()));
-            publisherColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getPublisherName()));
+            // Load the Manage Books view initially (which will load admin-books.fxml)
+            showManageBooksView();
             
-            // Add available copies column using BookCopyDAO
-            copiesColumn.setCellValueFactory(cellData -> {
-                int count = bookCopyDAO.getAvailableCopiesCount(cellData.getValue().getId());
-                return new SimpleObjectProperty<>(count);
-            });
+            // Set up sidebar buttons (styling, etc.)
+            // Buttons are wired via FXML onAction attributes
             
-            setupActionColumn();
-            
-            // Load data
-            loadBooks();
-            
-            // Set up search functionality
-            searchBookField.textProperty().addListener((observable, oldValue, newValue) -> {
-                try {
-                    searchBooks(newValue);
-                } catch (SQLException e) {
-                    showErrorAlert("Error searching books", e.getMessage());
-                }
-            });
-            
-            // Setup add book button
-            addBookButton.setOnAction(this::handleAddBook);
-            
-            // Set up Issue Books sidebar button
-            // Button is now wired via FXML onAction attribute
-            
-        } catch (SQLException e) {
-            showErrorAlert("Database Error", "Could not connect to the database: " + e.getMessage());
+        } catch (Exception e) {
+            showErrorAlert("Initialization Error", "Could not initialize dashboard: " + e.getMessage());
+            e.printStackTrace();
         }
     }
     
@@ -532,7 +505,7 @@ public class LibrarianDashboardController implements DashboardController, AutoCl
     }
     
     /**
-     * Shows the Manage Books view in the main content area
+     * Shows the Manage Books view in the main content area by loading admin-books.fxml
      */
     @FXML
     private void showManageBooksView() {
@@ -540,12 +513,26 @@ public class LibrarianDashboardController implements DashboardController, AutoCl
             // First close the current child controller if applicable
             closeCurrentChildController();
             
-            // Reset the center of the main container to the default TabPane
-            // This will show the Manage Books tab again
-            mainContainer.setCenter(tabPane);
+            // Reset the database connection pool for a fresh start
+            try {
+                Database.resetConnection();
+            } catch (Exception e) {
+                System.err.println("Error resetting database connection: " + e.getMessage());
+            }
             
-            // Refresh the books data
-            loadBooks();
+            // Load the admin books component
+            FXMLLoader loader = new FXMLLoader(Main.class.getResource("views/admin-books.fxml"));
+            Node adminBooksView = loader.load();
+            
+            // Get the AdminBooksController and initialize it
+            AdminBooksController adminBooksController = loader.getController();
+            adminBooksController.initData(currentUser);
+            
+            // Set the controller as the current child controller for proper lifecycle management
+            currentChildController = adminBooksController;
+            
+            // Set the admin books view in the center of the main container
+            mainContainer.setCenter(adminBooksView);
             
             // Update active sidebar button
             setActiveButton(manageBooksBtn);
@@ -557,10 +544,7 @@ public class LibrarianDashboardController implements DashboardController, AutoCl
     }
     
     /**
-     * Closes resources used by this controller.
-     */
-    /**
-     * Open the book copy management dialog for a book
+     * Opens the book copy management dialog for a book
      * 
      * @param book The book to manage copies for
      */
