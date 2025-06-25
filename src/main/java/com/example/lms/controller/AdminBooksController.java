@@ -6,10 +6,13 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.util.Callback;
+
+import java.io.IOException;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -158,12 +161,39 @@ public class AdminBooksController implements ChildController {
      */
     @FXML
     private void onAddBookClick() {
-        // In a real implementation, this would open a dialog to add a new book
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Add Book");
-        alert.setHeaderText(null);
-        alert.setContentText("Add Book functionality will be implemented here.");
-        alert.showAndWait();
+        try {
+            // Load the book dialog FXML
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/lms/views/book-dialog.fxml"));
+            DialogPane dialogPane = loader.load();
+            
+            // Create the dialog
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setDialogPane(dialogPane);
+            dialog.setTitle("Add Book");
+            
+            // Get the controller
+            BookDialogController controller = loader.getController();
+            controller.setBook(null); // Create new book
+            
+            // Show the dialog and process the result
+            dialog.showAndWait().ifPresent(buttonType -> {
+                if (buttonType == ButtonType.OK) {
+                    Book newBook = controller.getBook();
+                    saveBook(newBook, true);
+                }
+                controller.close(); // Clean up resources
+            });
+            
+        } catch (IOException e) {
+            System.err.println("Error loading book dialog: " + e.getMessage());
+            e.printStackTrace();
+            
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText(null);
+            alert.setContentText("Failed to load book dialog: " + e.getMessage());
+            alert.showAndWait();
+        }
     }
     
     /**
@@ -257,12 +287,39 @@ public class AdminBooksController implements ChildController {
      * @param book The book to edit
      */
     private void editBook(Book book) {
-        // In a real implementation, this would open a dialog to edit the book
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Edit Book");
-        alert.setHeaderText(null);
-        alert.setContentText("Edit Book functionality will be implemented here.\nBook: " + book.getTitle());
-        alert.showAndWait();
+        try {
+            // Load the book dialog FXML
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/lms/views/book-dialog.fxml"));
+            DialogPane dialogPane = loader.load();
+            
+            // Create the dialog
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setDialogPane(dialogPane);
+            dialog.setTitle("Edit Book");
+            
+            // Get the controller and set the book to edit
+            BookDialogController controller = loader.getController();
+            controller.setBook(book);
+            
+            // Show the dialog and process the result
+            dialog.showAndWait().ifPresent(buttonType -> {
+                if (buttonType == ButtonType.OK) {
+                    Book updatedBook = controller.getBook();
+                    saveBook(updatedBook, false);
+                }
+                controller.close(); // Clean up resources
+            });
+            
+        } catch (IOException e) {
+            System.err.println("Error loading book dialog: " + e.getMessage());
+            e.printStackTrace();
+            
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText(null);
+            alert.setContentText("Failed to load book dialog: " + e.getMessage());
+            alert.showAndWait();
+        }
     }
     
     /**
@@ -301,5 +358,59 @@ public class AdminBooksController implements ChildController {
         alert.setHeaderText(book.getTitle());
         alert.setContentText(details.toString());
         alert.showAndWait();
+    }
+    
+    /**
+     * Save a book (add new or update existing)
+     * 
+     * @param book The book to save
+     * @param isNewBook Whether this is a new book or an existing one being updated
+     */
+    private void saveBook(Book book, boolean isNewBook) {
+        try {
+            boolean success;
+            String successMessage;
+            
+            if (isNewBook) {
+                // Add new book
+                success = bookDAO.addBook(book);
+                successMessage = "Book added successfully!";
+            } else {
+                // Update existing book
+                success = bookDAO.updateBook(book);
+                successMessage = "Book updated successfully!";
+            }
+            
+            if (success) {
+                // Show success message
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Success");
+                alert.setHeaderText(null);
+                alert.setContentText(successMessage);
+                alert.showAndWait();
+                
+                // Refresh the book list
+                loadBooks();
+                
+            } else {
+                // Show error message
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText(null);
+                alert.setContentText("Failed to save book. Please try again.");
+                alert.showAndWait();
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error saving book: " + e.getMessage());
+            e.printStackTrace();
+            
+            // Show error message with details
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Database Error");
+            alert.setHeaderText("Failed to save book");
+            alert.setContentText("Error: " + e.getMessage());
+            alert.showAndWait();
+        }
     }
 }

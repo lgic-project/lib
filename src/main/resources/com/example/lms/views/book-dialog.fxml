@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+
+<DialogPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.lms.controller.BookDialogController"
+            prefWidth="600.0">
+    <headerText>Add/Edit Book</headerText>
+    
+    <content>
+        <GridPane hgap="10" vgap="10">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+            
+            <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="120.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="200.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="180.0" />
+            </columnConstraints>
+            
+            <!-- Title -->
+            <Label text="Title:" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+            <TextField fx:id="titleField" promptText="Enter book title" 
+                     GridPane.rowIndex="0" GridPane.columnIndex="1" GridPane.columnSpan="2"/>
+            
+            <!-- Author -->
+            <Label text="Author:" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+            <TextField fx:id="authorField" promptText="Enter author name" 
+                     GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.columnSpan="2"/>
+            
+            <!-- ISBN -->
+            <Label text="ISBN:" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+            <TextField fx:id="isbnField" promptText="Enter ISBN" 
+                     GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.columnSpan="2"/>
+            
+            <!-- Publisher -->
+            <Label text="Publisher:" GridPane.rowIndex="3" GridPane.columnIndex="0" />
+            <ComboBox fx:id="publisherComboBox" promptText="Select publisher" 
+                    GridPane.rowIndex="3" GridPane.columnIndex="1" GridPane.columnSpan="2"/>
+            
+            <!-- Publication Year -->
+            <Label text="Publication Year:" GridPane.rowIndex="4" GridPane.columnIndex="0" />
+            <TextField fx:id="yearField" promptText="Enter publication year" 
+                     GridPane.rowIndex="4" GridPane.columnIndex="1" />
+            
+            <!-- Edition -->
+            <Label text="Edition:" GridPane.rowIndex="5" GridPane.columnIndex="0" />
+            <TextField fx:id="editionField" promptText="Enter edition" 
+                     GridPane.rowIndex="5" GridPane.columnIndex="1" />
+            
+            <!-- Language -->
+            <Label text="Language:" GridPane.rowIndex="6" GridPane.columnIndex="0" />
+            <TextField fx:id="languageField" promptText="Enter language" 
+                     GridPane.rowIndex="6" GridPane.columnIndex="1" />
+            
+            <!-- Pages -->
+            <Label text="Pages:" GridPane.rowIndex="7" GridPane.columnIndex="0" />
+            <TextField fx:id="pagesField" promptText="Enter number of pages" 
+                     GridPane.rowIndex="7" GridPane.columnIndex="1" />
+            
+            <!-- Categories -->
+            <Label text="Categories:" GridPane.rowIndex="8" GridPane.columnIndex="0" />
+            <ListView fx:id="categoriesListView" prefHeight="100.0"
+                    GridPane.rowIndex="8" GridPane.columnIndex="1" />
+            <VBox spacing="5" GridPane.rowIndex="8" GridPane.columnIndex="2">
+                <Button fx:id="addCategoryBtn" text="Add Category" maxWidth="Infinity" />
+                <Button fx:id="removeCategoryBtn" text="Remove Category" maxWidth="Infinity" />
+            </VBox>
+            
+            <!-- Description -->
+            <Label text="Description:" GridPane.rowIndex="9" GridPane.columnIndex="0" />
+            <TextArea fx:id="descriptionArea" promptText="Enter description" wrapText="true" prefHeight="100.0"
+                    GridPane.rowIndex="9" GridPane.columnIndex="1" GridPane.columnSpan="2"/>
+            
+            <!-- Cover Image -->
+            <Label text="Cover Image:" GridPane.rowIndex="10" GridPane.columnIndex="0" />
+            <ImageView fx:id="coverImageView" fitHeight="150.0" fitWidth="120.0" preserveRatio="true"
+                     GridPane.rowIndex="10" GridPane.columnIndex="1">
+            </ImageView>
+            <VBox spacing="5" GridPane.rowIndex="10" GridPane.columnIndex="2">
+                <Button fx:id="uploadImageBtn" text="Upload Image" maxWidth="Infinity" />
+                <Label fx:id="imagePathLabel" text="No image selected" wrapText="true" />
+            </VBox>
+        </GridPane>
+    </content>
+    
+    <buttonTypes>
+        <ButtonType fx:constant="OK" />
+        <ButtonType fx:constant="CANCEL" />
+    </buttonTypes>
+</DialogPane>
