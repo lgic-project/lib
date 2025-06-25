@@ -366,7 +366,7 @@ public class BorrowingDAO {
         StringBuilder queryBuilder = new StringBuilder(
             "SELECT b.* FROM borrowings b " +
             "JOIN users u ON b.user_id = u.id " +
-            "JOIN book_copies bc ON b.copy_id = bc.id " +
+            "JOIN book_copies bc ON b.book_copy_id = bc.id " +
             "JOIN books bk ON bc.book_id = bk.id " +
             "WHERE (u.name LIKE ? OR bk.title LIKE ?) "
         );
@@ -488,7 +488,7 @@ public List<Map<String, String>> getRecentBorrowingActivities(int limit) throws 
     
     String query = "SELECT b.id, bk.title, u.name as user_name, b.borrow_date, b.due_date " +
                    "FROM borrowings b " +
-                   "JOIN book_copies bc ON b.copy_id = bc.id " +
+                   "JOIN book_copies bc ON b.book_copy_id = bc.id " +
                    "JOIN books bk ON bc.book_id = bk.id " +
                    "JOIN users u ON b.user_id = u.id " +
                    "ORDER BY b.borrow_date DESC LIMIT ?";
