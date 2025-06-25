@@ -1,74 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.scene.text.*?>
 <?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
 
-<StackPane xmlns="http://javafx.com/javafx"
-          xmlns:fx="http://javafx.com/fxml"
-          fx:controller="com.example.lms.controller.LoginController"
-          prefHeight="600.0" prefWidth="800.0" 
-          stylesheets="@styles.css">
+<StackPane prefHeight="600.0" prefWidth="800.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.lms.controller.LoginController">
     <HBox spacing="0">
         <!-- Left Panel with Illustration -->
-        <VBox styleClass="left-panel" HBox.hgrow="ALWAYS" alignment="CENTER" maxWidth="350">
+        <VBox alignment="CENTER" maxWidth="350" styleClass="left-panel" HBox.hgrow="ALWAYS">
             <Label styleClass="app-name" text="Library Management System" wrapText="true" />
             <Label styleClass="app-tagline" text="Access your digital library with ease" wrapText="true" />
-            <ImageView fx:id="illustrationImg" fitWidth="280" fitHeight="280" preserveRatio="true">
+            <ImageView fx:id="illustrationImg" fitHeight="280" fitWidth="280" preserveRatio="true">
                 <Image url="@../images/library-illustration.png" />
             </ImageView>
             <padding>
-                <Insets top="20" right="20" bottom="20" left="20" />
+                <Insets bottom="20" left="20" right="20" top="20" />
             </padding>
         </VBox>
         
         <!-- Right Panel with Login Form -->
-        <VBox alignment="CENTER" HBox.hgrow="ALWAYS" spacing="15">
+        <VBox alignment="CENTER" spacing="15" HBox.hgrow="ALWAYS">
             <StackPane>
-                <VBox styleClass="auth-container" maxWidth="400" spacing="15">
+                <VBox maxWidth="400" spacing="15" styleClass="auth-container">
                     <Label styleClass="auth-title" text="Welcome Back" />
                     <Label styleClass="auth-subtitle" text="Sign in to continue to your account" />
                     
                     <!-- Email Field -->
                     <VBox styleClass="form-group">
                         <Label styleClass="form-group-label" text="EMAIL" />
-                        <TextField fx:id="emailField" styleClass="input-field" promptText="Enter your email" />
+                        <TextField fx:id="emailField" promptText="Enter your email" styleClass="input-field" text="sunil@gmail.com" />
                     </VBox>
                     
                     <!-- Password Field -->
                     <VBox styleClass="form-group">
                         <Label styleClass="form-group-label" text="PASSWORD" />
-                        <PasswordField fx:id="passwordField" styleClass="input-field" promptText="Enter your password" />
+                        <PasswordField fx:id="passwordField" promptText="Enter your password" styleClass="input-field" />
                     </VBox>
                     
                     <!-- Remember me & Forgot Password Row -->
                     <HBox alignment="CENTER_LEFT" spacing="10">
                         <CheckBox fx:id="rememberMeCheck" text="Remember me" />
                         <Region HBox.hgrow="ALWAYS" />
-                        <Button fx:id="forgotPasswordBtn" styleClass="link-btn" 
-                                text="Forgot Password?" onAction="#onForgotPasswordClick" />
+                        <Button fx:id="forgotPasswordBtn" onAction="#onForgotPasswordClick" styleClass="link-btn" text="Forgot Password?" />
                     </HBox>
                     
                     <!-- Error Label -->
-                    <Label fx:id="errorLabel" styleClass="error-label" visible="false" 
-                           text="Invalid email or password" wrapText="true" />
+                    <Label fx:id="errorLabel" styleClass="error-label" text="Invalid email or password" visible="false" wrapText="true" />
                     
                     <!-- Login Button -->
-                    <Button fx:id="loginBtn" styleClass="action-btn" text="LOG IN" 
-                            onAction="#onLoginClick" maxWidth="Infinity" />
+                    <Button fx:id="loginBtn" maxWidth="Infinity" onAction="#onLoginClick" styleClass="action-btn" text="LOG IN" />
                     
                     <!-- Don't have account section -->
                     <HBox alignment="CENTER" spacing="5">
                         <Label text="Don't have an account?" />
-                        <Button fx:id="signupBtn" styleClass="link-btn" 
-                                text="Sign Up" onAction="#onSignupClick" />
+                        <Button fx:id="signupBtn" onAction="#onSignupClick" styleClass="link-btn" text="Sign Up" />
                     </HBox>
                 </VBox>
             </StackPane>
             <padding>
-                <Insets top="30" right="30" bottom="30" left="30" />
+                <Insets bottom="30" left="30" right="30" top="30" />
             </padding>
         </VBox>
     </HBox>

@@ -7,8 +7,12 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.util.Callback;
 
@@ -328,36 +332,85 @@ public class AdminBooksController implements ChildController {
      * @param book The book to view
      */
     private void viewBookDetails(Book book) {
-        // In a real implementation, this would open a dialog showing detailed information
+        // Create a custom dialog with image and text
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Book Details");
+        dialog.setHeaderText(book.getTitle());
+        
+        // Create a grid for organizing content
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+        
+        // Create image view for cover
+        ImageView coverView = new ImageView();
+        coverView.setFitHeight(200);
+        coverView.setFitWidth(150);
+        coverView.setPreserveRatio(true);
+        
+        // Set cover image if available
+        String coverPath = book.getCoverImage();
+        if (coverPath != null && !coverPath.isEmpty()) {
+            try {
+                Image image = new Image(getClass().getResourceAsStream(coverPath));
+                coverView.setImage(image);
+            } catch (Exception e) {
+                System.err.println("Error loading book cover: " + e.getMessage());
+                coverView.setStyle("-fx-background-color: lightgray;");
+            }
+        } else {
+            coverView.setStyle("-fx-background-color: lightgray;");
+        }
+        
+        // Build the details text
         StringBuilder details = new StringBuilder();
-        details.append("Title: ").append(book.getTitle()).append("\n");
-        details.append("ISBN: ").append(book.getIsbn()).append("\n");
-        details.append("Publication Year: ").append(book.getPublicationYear()).append("\n");
+        details.append("ISBN: ").append(book.getIsbn()).append("\n\n");
+        details.append("Publication Year: ").append(book.getPublicationYear()).append("\n\n");
         
         if (book.getPublisher() != null) {
-            details.append("Publisher: ").append(book.getPublisher().getName()).append("\n");
+            details.append("Publisher: ").append(book.getPublisher().getName()).append("\n\n");
         }
         
         if (!book.getAuthorName().isEmpty()) {
-            details.append("Authors: ").append(book.getAuthorName()).append("\n");
+            details.append("Author: ").append(book.getAuthorName()).append("\n\n");
         }
         
         if (!book.getCategories().isEmpty()) {
             details.append("Categories: ").append(book.getCategories().stream()
                     .map(Category::getName)
                     .collect(Collectors.joining(", ")))
-                    .append("\n");
+                    .append("\n\n");
         }
         
+        // Add book status
         int availableCopies = bookCopyDAO.getAvailableCopiesCount(book.getId());
         int totalCopies = bookCopyDAO.getTotalCopiesCount(book.getId());
         details.append("Available Copies: ").append(availableCopies).append(" / ").append(totalCopies);
+
+        // Add description if available
+        if (book.getDescription() != null && !book.getDescription().isEmpty()) {
+            details.append("\n\n").append("Description:\n").append(book.getDescription());
+        }
         
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Book Details");
-        alert.setHeaderText(book.getTitle());
-        alert.setContentText(details.toString());
-        alert.showAndWait();
+        // Add elements to grid
+        grid.add(coverView, 0, 0, 1, 2);
+        
+        TextArea detailsArea = new TextArea(details.toString());
+        detailsArea.setEditable(false);
+        detailsArea.setWrapText(true);
+        detailsArea.setPrefWidth(300);
+        detailsArea.setPrefHeight(250);
+        grid.add(detailsArea, 1, 0);
+        
+        // Set the dialog content
+        dialog.getDialogPane().setContent(grid);
+        
+        // Add close button
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+        
+        // Show the dialog
+        dialog.showAndWait();
     }
     
     /**

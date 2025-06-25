@@ -65,11 +65,7 @@
                   <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
                </VBox.margin>
             </Button>
-            <Button fx:id="staffBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onStaffClick" styleClass="sidebar-button" text="Manage Staff">
-               <VBox.margin>
-                  <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
-               </VBox.margin>
-            </Button>
+            <!-- Staff button removed as per user request -->
             <Button fx:id="settingsBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onSettingsClick" styleClass="sidebar-button" text="System Settings">
                <VBox.margin>
                   <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
