@@ -335,6 +335,8 @@ public class IssueBookDialogController {
             Borrowing borrowing = new Borrowing();
             borrowing.setBookCopyId(selectedBookCopy.getId());
             borrowing.setUserId(selectedMember.getId());
+            borrowing.setUser(selectedMember); // Set the full User object, not just ID
+            borrowing.setBookCopy(selectedBookCopy); // Set the full BookCopy object, not just ID
             borrowing.setBorrowDate(LocalDate.now());
             borrowing.setDueDate(LocalDate.now().plusDays(borrowingPeriod));
             borrowing.setIssuedBy(currentUser); // Current librarian as issuer

@@ -179,7 +179,7 @@ public class BorrowingDAO {
         
         try {
             // Insert borrowing record
-            String insertQuery = "INSERT INTO borrowings (user_id, copy_id, borrow_date, due_date, issued_by) " +
+            String insertQuery = "INSERT INTO borrowings (user_id, book_copy_id, borrow_date, due_date, issued_by) " +
                                "VALUES (?, ?, ?, ?, ?)";
             
             try (PreparedStatement stmt = connection.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS)) {

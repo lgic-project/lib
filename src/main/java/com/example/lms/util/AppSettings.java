@@ -22,7 +22,7 @@ public class AppSettings {
         
         try {
             conn = Database.getConnection();
-            String query = "SELECT value FROM app_settings WHERE setting_key = 'default_borrow_days'";
+            String query = "SELECT setting_value FROM app_setting WHERE setting_key = 'default_borrow_days'";
             stmt = conn.prepareStatement(query);
             rs = stmt.executeQuery();
             

@@ -270,7 +270,7 @@ public class BookCopyDAO {
      */
     public boolean deleteBookCopy(int id) throws SQLException {
         // Check if the copy is currently borrowed
-        String checkQuery = "SELECT COUNT(*) FROM borrowings WHERE copy_id = ? AND return_date IS NULL";
+        String checkQuery = "SELECT COUNT(*) FROM borrowings WHERE book_copy_id = ? AND return_date IS NULL";
         try (PreparedStatement checkStmt = connection.prepareStatement(checkQuery)) {
             checkStmt.setInt(1, id);
             
