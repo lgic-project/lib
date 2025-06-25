@@ -35,7 +35,7 @@
                     <!-- Password Field -->
                     <VBox styleClass="form-group">
                         <Label styleClass="form-group-label" text="PASSWORD" />
-                        <PasswordField fx:id="passwordField" promptText="Enter your password" styleClass="input-field" />
+                        <PasswordField fx:id="passwordField" promptText="Enter your password" styleClass="input-field" text="sunil123" />
                     </VBox>
                     
                     <!-- Remember me & Forgot Password Row -->

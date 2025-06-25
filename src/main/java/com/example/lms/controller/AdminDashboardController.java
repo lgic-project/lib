@@ -38,8 +38,7 @@ public class AdminDashboardController implements DashboardController {
     @FXML
     private Button booksBtn;
     
-    @FXML
-    private Button staffBtn;
+    // staffBtn removed as per user request
     
     @FXML
     private Button settingsBtn;
@@ -55,6 +54,12 @@ public class AdminDashboardController implements DashboardController {
     
     private User currentUser;
     private AppSettingDAO appSettingDAO;
+    
+    // Track the currently loaded view
+    private String currentView = null;
+    
+    // Track the current child controller
+    private ChildController currentChildController = null;
     
     /**
      * Initializes the controller.
@@ -153,14 +158,7 @@ public class AdminDashboardController implements DashboardController {
         loadView("admin-books.fxml");
     }
     
-    /**
-     * Event handler for staff button click
-     */
-    @FXML
-    private void onStaffClick() {
-        setActiveButton(staffBtn);
-        loadView("admin-staff.fxml");
-    }
+    // Staff button click handler removed as the button no longer exists
     
     /**
      * Event handler for settings button click
@@ -175,6 +173,7 @@ public class AdminDashboardController implements DashboardController {
      * Loads the dashboard view into the content area
      */
     private void loadDashboardView() {
+        setActiveButton(dashboardBtn);
         loadView("admin-home.fxml");
     }
     
@@ -185,6 +184,18 @@ public class AdminDashboardController implements DashboardController {
      */
     private void loadView(String fxmlFile) {
         try {
+            // First close the current controller if it exists
+            if (currentChildController != null) {
+                try {
+                    currentChildController.close();
+                    System.out.println("Closed previous controller: " + currentChildController.getClass().getSimpleName());
+                } catch (Exception e) {
+                    System.err.println("Error closing previous controller: " + e.getMessage());
+                    e.printStackTrace();
+                }
+                currentChildController = null;
+            }
+            
             FXMLLoader loader = new FXMLLoader(Main.class.getResource("views/" + fxmlFile));
             Parent view = loader.load();
             contentArea.getChildren().clear();
@@ -193,7 +204,9 @@ public class AdminDashboardController implements DashboardController {
             // If the loaded view has a controller that implements ChildController
             Object controller = loader.getController();
             if (controller instanceof ChildController) {
-                ((ChildController) controller).initData(currentUser);
+                // Save reference to current child controller
+                currentChildController = (ChildController) controller;
+                currentChildController.initData(currentUser);
             }
             
         } catch (IOException e) {
@@ -208,13 +221,14 @@ public class AdminDashboardController implements DashboardController {
      * @param activeButton The button to set as active
      */
     private void setActiveButton(Button activeButton) {
+        // dashboardBtn.getStyleClass().add("sidebar-button");
         // Remove active class from all buttons
         dashboardBtn.getStyleClass().remove("sidebar-button-active");
         usersBtn.getStyleClass().remove("sidebar-button-active");
         booksBtn.getStyleClass().remove("sidebar-button-active");
-        staffBtn.getStyleClass().remove("sidebar-button-active");
+        // staffBtn removed from here
         settingsBtn.getStyleClass().remove("sidebar-button-active");
-        
+
         // Add active class to selected button
         if (!activeButton.getStyleClass().contains("sidebar-button-active")) {
             activeButton.getStyleClass().add("sidebar-button-active");

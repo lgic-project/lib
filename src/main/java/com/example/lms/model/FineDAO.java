@@ -459,22 +459,18 @@ public class FineDAO {
     }
     
     /**
-     * Close the database connection
+     * Close resources and release the database connection
+     * 
+     * @throws SQLException if database error occurs
      */
-    public void close() {
-        try {
-            if (connection != null && !connection.isClosed()) {
-                connection.close();
-            }
-            
-            // Close related DAOs
-            // UserDAO doesn't have close() method
-            // No need to close the userDAO here
-            if (borrowingDAO != null) {
-                borrowingDAO.close();
-            }
-        } catch (SQLException e) {
-            System.err.println("Error closing FineDAO: " + e.getMessage());
+    public void close() throws SQLException {
+        // Release the connection back to the pool
+        Database.releaseConnection();
+        
+        // Close related DAOs
+        if (borrowingDAO != null) {
+            borrowingDAO.close();
         }
+        // UserDAO will be handled separately
     }
 }

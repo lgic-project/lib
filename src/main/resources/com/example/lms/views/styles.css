@@ -190,3 +190,84 @@
 .valid-input {
     -fx-border-color: #2ecc71;
 }
+
+/* Dashboard Styles */
+.top-bar {
+    -fx-background-color: #333366;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 2);
+}
+
+.app-title {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.sidebar {
+    -fx-background-color: white;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 3, 0, 1, 0);
+}
+
+.sidebar-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #333;
+    -fx-alignment: CENTER_LEFT;
+    -fx-font-size: 14px;
+    -fx-padding: 12 15;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+}
+
+.sidebar-button:hover {
+    -fx-background-color: #f0f0f0;
+}
+
+.sidebar-button-active {
+    -fx-background-color: #e6e9ff;
+    -fx-text-fill: #333366;
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER_LEFT;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-font-size: 14px;
+    -fx-padding: 12 15;
+    -fx-border-color: #333366;
+    -fx-border-width: 0 0 0 3;
+    -fx-background-radius: 0 5 5 0;
+    -fx-cursor: hand;
+}
+
+.stat-box {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 6, 0, 0, 2);
+    -fx-padding: 15;
+}
+
+.chart-container {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 6, 0, 0, 2);
+}
+
+.book-table {
+    -fx-background-radius: 5;
+    -fx-background-color: white;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 6, 0, 0, 2);
+}
+
+.book-table .column-header {
+    -fx-background-color: #f0f2ff;
+    -fx-padding: 10 5;
+}
+
+.button-logout {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+    -fx-text-fill: white;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+}
+
+.button-logout:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.3);
+}

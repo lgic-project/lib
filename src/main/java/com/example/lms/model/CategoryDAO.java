@@ -301,15 +301,12 @@ public class CategoryDAO {
     }
     
     /**
-     * Close the database connection
+     * Close resources and release the database connection
+     * 
+     * @throws SQLException if database error occurs
      */
-    public void close() {
-        try {
-            if (connection != null && !connection.isClosed()) {
-                connection.close();
-            }
-        } catch (SQLException e) {
-            System.err.println("Error closing CategoryDAO: " + e.getMessage());
-        }
+    public void close() throws SQLException {
+        // Release the connection back to the pool
+        Database.releaseConnection();
     }
 }

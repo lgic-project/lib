@@ -17,14 +17,16 @@ import javafx.scene.layout.VBox;
 import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Controller for the admin dashboard home view.
  */
-public class AdminHomeController implements ChildController {
+public class AdminHomeController implements ChildController, AutoCloseable {
 
     @FXML
     private Label totalBooksLabel;
@@ -86,31 +88,58 @@ public class AdminHomeController implements ChildController {
      */
     private void loadDashboardStatistics() {
         try {
+            // Load each statistic independently to isolate errors
+            
             // Book statistics
-            int totalBooks = bookDAO.getTotalBooks();
-            int borrowedBooks = borrowingDAO.getActiveBorrowingsCount();
+            try {
+                int totalBooks = bookDAO.getTotalBooks();
+                totalBooksLabel.setText(String.valueOf(totalBooks));
+            } catch (SQLException e) {
+                System.err.println("Error loading book statistics: " + e.getMessage());
+                totalBooksLabel.setText("0");
+            }
+            
+            // Borrowing statistics
+            try {
+                int borrowedBooks = borrowingDAO.getActiveBorrowingsCount();
+                borrowedBooksLabel.setText(String.valueOf(borrowedBooks));
+            } catch (SQLException e) {
+                System.err.println("Error loading borrowing statistics: " + e.getMessage());
+                borrowedBooksLabel.setText("0");
+            }
             
             // User statistics
             int totalUsers = userDAO.getTotalUsers();
-            
-            // Fine statistics
-            double totalFines = fineDAO.getTotalPendingFines();
-            
-            // Update UI
-            totalBooksLabel.setText(String.valueOf(totalBooks));
-            borrowedBooksLabel.setText(String.valueOf(borrowedBooks));
             totalUsersLabel.setText(String.valueOf(totalUsers));
+
+            // Fine statistics
+            try {
+                double totalFines = fineDAO.getTotalPendingFines();
+                NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
+                pendingFinesLabel.setText(currencyFormat.format(totalFines));
+            } catch (SQLException e) {
+                System.err.println("Error loading fine statistics: " + e.getMessage());
+                pendingFinesLabel.setText("$0.00");
+            }
             
-            // Format currency
-            NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
-            pendingFinesLabel.setText(currencyFormat.format(totalFines));
+            // Update charts with real data - only if we loaded the basic stats successfully
+            try {
+                loadCategoryChart();
+            } catch (SQLException e) {
+                System.err.println("Error loading category chart: " + e.getMessage());
+                // Keep placeholder chart data
+            }
             
-            // Update charts with real data
-            loadCategoryChart();
-            loadMonthlyBorrowingChart();
+            try {
+                loadMonthlyBorrowingChart();
+            } catch (SQLException e) {
+                System.err.println("Error loading monthly borrowing chart: " + e.getMessage());
+                // Keep placeholder chart data
+            }
             
-        } catch (SQLException e) {
-            System.err.println("Error loading dashboard statistics: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Unexpected error loading dashboard statistics: " + e.getMessage());
+            e.printStackTrace();
             // Fallback to placeholder data if database access fails
             totalBooksLabel.setText("0");
             borrowedBooksLabel.setText("0");
@@ -143,39 +172,61 @@ public class AdminHomeController implements ChildController {
         series.getData().add(new XYChart.Data<>("May", 45));
         series.getData().add(new XYChart.Data<>("Jun", 38));
         
+        
         monthlyChart.getData().add(series);
     }
     
     /**
      * Load category chart with real data
+     * @throws SQLException if database access fails
      */
-    private void loadCategoryChart() {
+    private void loadCategoryChart() throws SQLException {
+        // Create a fresh DAO instance just for this operation to avoid connection sharing issues
+        BookDAO localBookDAO = null;
         try {
-            Map<String, Integer> categories = bookDAO.getBookCountByCategory();
+            localBookDAO = new BookDAO();
             
+            // Get category statistics
+            Map<String, Integer> categoryStats = localBookDAO.getBookCountByCategory();
+            
+            // Create chart data
             ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList();
-            for (Map.Entry<String, Integer> entry : categories.entrySet()) {
+            
+            // Add each category
+            for (Map.Entry<String, Integer> entry : categoryStats.entrySet()) {
                 pieChartData.add(new PieChart.Data(entry.getKey(), entry.getValue()));
             }
             
+            // Update chart
             categoryChart.setData(pieChartData);
             
-        } catch (SQLException e) {
-            System.err.println("Error loading category chart: " + e.getMessage());
-            // Chart will keep the placeholder data
+        } finally {
+            // Always close the local DAO to ensure connection is properly released
+            if (localBookDAO != null) {
+                try {
+                    localBookDAO.close();
+                } catch (SQLException e) {
+                    System.err.println("Error closing local book DAO: " + e.getMessage());
+                }
+            }
         }
     }
     
     /**
      * Load monthly borrowing chart with real data
+     * @throws SQLException if database access fails
      */
-    private void loadMonthlyBorrowingChart() {
+    private void loadMonthlyBorrowingChart() throws SQLException {
+        // Create a fresh DAO instance just for this operation to avoid connection sharing issues
+        BorrowingDAO localBorrowingDAO = null;
         try {
+            localBorrowingDAO = new BorrowingDAO();
+            
             // Get current year
             int currentYear = LocalDate.now().getYear();
             
             // Get monthly borrowing counts
-            Map<Integer, Integer> monthlyBorrowings = borrowingDAO.getMonthlyBorrowingCounts(currentYear);
+            Map<Integer, Integer> monthlyBorrowings = localBorrowingDAO.getMonthlyBorrowingCounts(currentYear);
             
             // Create series
             XYChart.Series<String, Number> series = new XYChart.Series<>();
@@ -185,18 +236,25 @@ public class AdminHomeController implements ChildController {
             String[] months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", 
                               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
             
-            for (String month : months) {
-                Integer count = monthlyBorrowings.getOrDefault(month, 0);
-                series.getData().add(new XYChart.Data<>(month, count));
+            for (int i = 0; i < months.length; i++) {
+                // Month in database is 1-based (January = 1)
+                Integer count = monthlyBorrowings.getOrDefault(i + 1, 0);
+                series.getData().add(new XYChart.Data<>(months[i], count));
             }
             
             // Update chart
             monthlyChart.getData().clear();
             monthlyChart.getData().add(series);
             
-        } catch (SQLException e) {
-            System.err.println("Error loading monthly borrowing chart: " + e.getMessage());
-            // Chart will keep the placeholder data
+        } finally {
+            // Always close the local DAO to ensure connection is properly released
+            if (localBorrowingDAO != null) {
+                try {
+                    localBorrowingDAO.close();
+                } catch (SQLException e) {
+                    System.err.println("Error closing local borrowing DAO: " + e.getMessage());
+                }
+            }
         }
     }
     
@@ -204,18 +262,44 @@ public class AdminHomeController implements ChildController {
      * Load recent activities for display
      */
     private void loadRecentActivities() {
-        // This would typically load recent events from the database
-        // For now, we'll add placeholder data
         recentActivitiesContainer.getChildren().clear();
         
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        LocalDate today = LocalDate.now();
-        
-        addActivityItem("New user registered: Sarah Johnson", today.atTime(9, 30).format(formatter));
-        addActivityItem("Book borrowed: 'Clean Code' by Robert Martin", today.atTime(10, 15).format(formatter));
-        addActivityItem("Fine payment received: $12.50", today.atTime(11, 45).format(formatter));
-        addActivityItem("New book added: 'Design Patterns'", today.atTime(13, 20).format(formatter));
-        addActivityItem("User updated profile: John Smith", today.atTime(14, 5).format(formatter));
+        // Use a separate try-catch block to isolate errors in this method from other parts of the dashboard
+        BorrowingDAO localBorrowingDAO = null;
+        try {
+            // Create a fresh DAO instance just for this operation to avoid connection sharing issues
+            localBorrowingDAO = new BorrowingDAO();
+            
+            // Get recent borrowings (limit to 5)
+            List<Map<String, String>> borrowingActivities = localBorrowingDAO.getRecentBorrowingActivities(5);
+            
+            // Display each activity
+            for (Map<String, String> activity : borrowingActivities) {
+                String message = "Book borrowed: '" + activity.get("title") + "' by " + activity.get("user");
+                addActivityItem(message, activity.get("date"));
+            }
+            
+            // If no activities were found, add a message
+            if (borrowingActivities.isEmpty()) {
+                addActivityItem("No recent borrowing activities", LocalDateTime.now().toString());
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error loading recent activities: " + e.getMessage());
+            e.printStackTrace();
+            
+            // Add fallback message if database access fails
+            addActivityItem("Could not load recent activities", LocalDateTime.now().toString());
+        } finally {
+            // Always close the local DAO to ensure connection is properly released
+            if (localBorrowingDAO != null) {
+                try {
+                    localBorrowingDAO.close();
+                } catch (SQLException e) {
+                    System.err.println("Error closing local borrowing DAO: " + e.getMessage());
+                }
+            }
+        }
     }
     
     /**
@@ -228,5 +312,40 @@ public class AdminHomeController implements ChildController {
         Label activityLabel = new Label(activity + " - " + timestamp);
         activityLabel.setWrapText(true);
         recentActivitiesContainer.getChildren().add(activityLabel);
+    }
+    
+    /**
+     * Close all resources used by this controller
+     * Called when switching views or closing the application
+     */
+    @Override
+    public void close() throws Exception {
+        try {
+            // Close all DAOs
+            if (bookDAO != null) {
+                bookDAO.close();
+                bookDAO = null;
+            }
+            if (userDAO != null) {
+//                userDAO.close();
+                userDAO = null;
+            }
+            if (borrowingDAO != null) {
+                borrowingDAO.close();
+                borrowingDAO = null;
+            }
+            if (fineDAO != null) {
+                try {
+                    fineDAO.close();
+                } catch (SQLException e) {
+                    System.err.println("Error closing FineDAO: " + e.getMessage());
+                }
+                fineDAO = null;
+            }
+            System.out.println("AdminHomeController resources closed successfully");
+        } catch (SQLException e) {
+            System.err.println("Error closing AdminHomeController resources: " + e.getMessage());
+            throw e;
+        }
     }
 }

@@ -470,26 +470,23 @@ public class BookDAO {
     }
     
     /**
-     * Close the database connection
+     * Close resources and release the database connection
+     * 
+     * @throws SQLException if database error occurs
      */
-    public void close() {
-        try {
-            if (connection != null && !connection.isClosed()) {
-                connection.close();
-            }
-            
-            // Close related DAOs
-            if (publisherDAO != null) {
-                publisherDAO.close();
-            }
+    public void close() throws SQLException {
+        // Release the connection back to the pool
+        Database.releaseConnection();
+
+        // Close related DAOs
+        if (publisherDAO != null) {
+            publisherDAO.close();
+        }
 //            if (authorDAO != null) {
 //                authorDAO.close();
 //            }
-            if (categoryDAO != null) {
-                categoryDAO.close();
-            }
-        } catch (SQLException e) {
-            System.err.println("Error closing BookDAO: " + e.getMessage());
+        if (categoryDAO != null) {
+            categoryDAO.close();
         }
     }
 }

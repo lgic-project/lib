@@ -471,22 +471,57 @@ public class BorrowingDAO {
         }
         
         // Update the status based on dates
-        borrowing.updateStatus();
-        
-        return borrowing;
-    }
+    borrowing.updateStatus();
     
-    /**
-     * Close the DAO and associated resources
-     */
-    public void close() {
-        try {
-            if (bookCopyDAO != null) {
-                bookCopyDAO.close();
+    return borrowing;
+}
+
+/**
+ * Get recent borrowing activities for dashboard
+ * 
+ * @param limit Maximum number of activities to return
+ * @return List of maps containing activity details
+ * @throws SQLException if database error occurs
+ */
+public List<Map<String, String>> getRecentBorrowingActivities(int limit) throws SQLException {
+    List<Map<String, String>> activities = new ArrayList<>();
+    
+    String query = "SELECT b.id, bk.title, u.name as user_name, b.borrow_date, b.due_date " +
+                   "FROM borrowings b " +
+                   "JOIN book_copies bc ON b.copy_id = bc.id " +
+                   "JOIN books bk ON bc.book_id = bk.id " +
+                   "JOIN users u ON b.user_id = u.id " +
+                   "ORDER BY b.borrow_date DESC LIMIT ?";
+    
+    try (PreparedStatement stmt = connection.prepareStatement(query)) {
+        stmt.setInt(1, limit);
+        
+        try (ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                Map<String, String> activity = new HashMap<>();
+                activity.put("type", "borrow");
+                activity.put("id", rs.getString("id"));
+                activity.put("title", rs.getString("title"));
+                activity.put("user", rs.getString("user_name"));
+                activity.put("date", rs.getTimestamp("borrow_date").toString());
+                activities.add(activity);
             }
-            // No need to close the userDAO as it doesn't have a close() method
-        } catch (SQLException e) {
-            System.err.println("Error closing BorrowingDAO: " + e.getMessage());
         }
     }
+    
+    return activities;
+}
+
+/**
+ * Close resources and release the database connection
+ */
+public void close() throws SQLException {
+    // Release the connection back to the pool
+    Database.releaseConnection();
+    
+    // Close child DAOs if necessary
+    if (bookCopyDAO != null) {
+        bookCopyDAO.close();
+    }
+}
 }
