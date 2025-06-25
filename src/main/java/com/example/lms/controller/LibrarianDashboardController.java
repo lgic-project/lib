@@ -496,6 +496,27 @@ public class LibrarianDashboardController implements DashboardController, AutoCl
     }
     
     /**
+     * Shows the Manage Books view in the main content area
+     */
+    @FXML
+    private void showManageBooksView() {
+        try {
+            // First close the current child controller if applicable
+            closeCurrentChildController();
+            
+            // Reset the center of the main container to the default TabPane
+            // This will show the Manage Books tab again
+            mainContainer.setCenter(tabPane);
+            
+            // Refresh the books data
+            loadBooks();
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Could not load Manage Books view", e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
      * Closes resources used by this controller.
      */
     /**
